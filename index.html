@@ -1,0 +1,208 @@
+<!--
+Galleria - A self contained HTML5 local gallery viewer
+Copyright © 2025 VitaSmith
+https://github.com/VitaSmith/galleria
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Galleria</title>
+  <meta name="referrer" content="no-referrer">
+  <style>
+    body {
+      margin: 0;
+      color: white;
+      background-color: black;
+      overflow: auto;
+    }
+    img {
+      display: block;
+      max-height: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+      cursor: pointer;
+    }
+    .thumbnail-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .thumbnail-list-item {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin: 10px;
+      cursor: pointer;
+    }
+    .thumbnail-label {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    .image-viewer {
+      width: 100vw;
+      height: 100vh;
+      display: none;
+      overflow: auto;
+    }
+    .image-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100vw;
+      height: 100vh;
+      overflow: auto;
+    }
+  </style>
+  <!-- Load the external gallery data and settings -->
+  <script type="text/javascript" src="data.js"></script>
+</head>
+<body>
+  <div class="thumbnail-list" id="thumbnailList"></div>
+  <div class="image-viewer" id="imageViewer">
+    <div class="image-container" id="imageContainer">
+      <img id="imageView" alt="Image not found">
+    </div>
+  </div>
+  <script>
+    let currentGallery = null;
+    let currentIndex = 0;
+    let fitToPage = settings.fitToPage;
+
+    const thumbnailList = document.getElementById("thumbnailList");
+    const imageView = document.getElementById("imageView");
+    const imageViewer = document.getElementById("imageViewer");
+    const imageContainer = document.getElementById("imageContainer");
+
+    let displayedElements = [];
+
+    // Create gallery thumbnails and labels
+    function createThumbnails() {
+      thumbnailList.innerHTML = "";
+      displayedElements = Object.keys(galleries);
+
+      displayedElements.forEach((galleryName) => {
+        const galleryData = galleries[galleryName];
+
+        const thumbnailListItem = document.createElement("div");
+        thumbnailListItem.classList.add("thumbnail-list-item");
+
+        const thumbnailImg = document.createElement("img");
+        thumbnailImg.src = galleryName + "/1" + settings.defaultExtension;
+        thumbnailImg.alt = "Thumbnail";
+        thumbnailImg.style.maxWidth = settings.thumbnailMaxWidth;
+        thumbnailImg.style.maxHeight = settings.thumbnailMaxHeight;
+
+        // Add event listener to open the image viewer when the thumbnail is clicked
+        thumbnailListItem.addEventListener("click", () => {
+          currentGallery = galleryName;
+          currentIndex = 0;
+          createThumbnails();
+          updateImage();
+          thumbnailList.style.display = "none";
+          imageViewer.style.display = "block";
+        });
+
+        // Set the label
+        const thumbnailLabel = document.createElement("span");
+        thumbnailLabel.classList.add("thumbnail-label");
+        thumbnailLabel.textContent = galleryData.alt ?? galleryName;
+        thumbnailLabel.textContent += " (" + galleryData.numImages + " images)";
+
+        thumbnailListItem.appendChild(thumbnailImg);
+        thumbnailListItem.appendChild(thumbnailLabel);
+
+        thumbnailList.appendChild(thumbnailListItem);
+      });
+    }
+
+    // Update the image and handle click events
+    function updateImage() {
+      if (!currentGallery)
+        return;
+      const galleryData = galleries[currentGallery];
+      const numImages = galleryData.numImages;
+      const imageName = String(currentIndex + 1) + settings.defaultExtension;
+      imageView.src = currentGallery + "/" + imageName;
+
+      if (fitToPage) {
+        imageView.style.maxHeight = "100%";
+        imageView.style.maxWidth = "100%";
+        imageContainer.style.width = "100vw";
+        imageContainer.style.height = "100vh";
+      } else {
+        imageView.style.maxHeight = "none";
+        imageView.style.maxWidth = "none";
+        imageContainer.style.width = "auto";
+        imageContainer.style.height = "auto";
+      }
+    }
+
+    imageView.addEventListener("click", (event) => {
+      if (currentGallery) {
+        const galleryData = galleries[currentGallery];
+        const numImages = galleryData.numImages;
+        const imageWidth = imageView.clientWidth;
+        // Check if the click is on the left or right side of the image
+        const isLeftSideClick = (event.clientX - imageView.getBoundingClientRect().left <= imageWidth / 2);
+        
+        if (
+          (isLeftSideClick && currentIndex === 0) ||
+          (!isLeftSideClick && currentIndex === galleries[currentGallery].numImages - 1)
+        ) {
+          // Go back to the gallery list if it's the first or last image
+          currentGallery = null;
+          thumbnailList.style.display = "flex";
+          imageViewer.style.display = "none";
+          imageView.src = "";
+        } else if (isLeftSideClick) {
+          // Go to the previous image
+          currentIndex = (currentIndex - 1) % numImages;
+          updateImage();
+        } else {
+          // Go to the next image
+          currentIndex = (currentIndex + 1) % numImages;
+          updateImage();
+        }
+      }
+    });
+
+    // Handle keyboard events
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "f" || event.key === "F") {
+        fitToPage = !fitToPage;
+        updateImage();
+      } else if (event.key === "Escape") {
+        currentGallery = null;
+        thumbnailList.style.display = "flex";
+        imageViewer.style.display = "none";
+        imageView.src = "";
+      }
+    });
+
+    // Wait for the DOM content to be loaded before creating the thumbnails
+    document.addEventListener("DOMContentLoaded", createThumbnails);
+  </script>
+</body>
+</html>
