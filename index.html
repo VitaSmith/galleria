@@ -30,7 +30,7 @@ SOFTWARE.
     body {
       margin: 0;
       color: white;
-      background-color: black;
+      background: black;
       overflow: auto;
     }
     img {
@@ -96,6 +96,10 @@ SOFTWARE.
     const imageContainer = document.getElementById("imageContainer");
 
     let displayedElements = [];
+
+    // Set the style
+    document.body.style.color = settings.defaultTextColor;
+    document.body.style.background = settings.defaultBackgroundColor;
 
     // Create gallery thumbnails and labels
     function createThumbnails() {
