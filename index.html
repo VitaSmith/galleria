@@ -96,13 +96,33 @@ SOFTWARE.
     let singleImageMode = true;
     let galleryNames = [];
     let imageList = [];
+    let skipped = 0;
 
     // Set the style
     document.body.style.color = settings.defaultTextColor;
     document.body.style.background = settings.defaultBackgroundColor;
 
-    // Apply an optional customExtension override to a sequential image name
-    function getImageName(imageName, galleryData) {
+    // Get the nth image name from a gallery according to all settings and options
+    function getImageName(index, galleryData) {
+      if (galleryData.imageList !== undefined)
+        return galleryData.imageList[index];
+      if (index === 0)
+        skipped = 0;
+      const padding = (galleryData.numberPadding !== undefined) ? galleryData.numberPadding.length : 0;
+      const prefix = (galleryData.imagePrefix !== undefined) ? galleryData.imagePrefix : "";
+      let startNumber = 1;
+      if (galleryData.firstImage !== undefined) {
+        const pos = galleryData.firstImage.lastIndexOf('.');
+        if (pos != -1)
+          startNumber = Number(galleryData.firstImage.substring(prefix.length, pos));
+      }
+      const defaultExtension = (galleryData.defaultExtension !== undefined) ?
+        galleryData.defaultExtension : settings.defaultExtension;
+      let imageName = prefix + String(startNumber + index + skipped).padStart(padding, "0") + defaultExtension;
+      if (galleryData.skipImage !== undefined && galleryData.skipImage.includes(imageName)) {
+        skipped++;
+        imageName = prefix + String(startNumber + index + skipped).padStart(padding, "0") + defaultExtension;
+      }
       if (galleryData.customExtension === undefined)
         return imageName;
       for (const customExtension of galleryData.customExtension) {
@@ -139,17 +159,7 @@ SOFTWARE.
           thumbnailList.appendChild(thumbnailListItem);
 
           const thumbnailImg = document.createElement("img");
-          let firstImageName = null;
-          if (galleryData.imageList !== undefined) {
-            // If we have a straight imageList, use the first entry
-            firstImageName = galleryData.imageList[0];
-          } else {
-            // Otherwise, build the first image name from the gallery data
-            const defaultExtension = (galleryData.defaultExtension !== undefined) ?
-              galleryData.defaultExtension : settings.defaultExtension;
-            firstImageName = getImageName("1" + defaultExtension, galleryData);
-          }
-          thumbnailImg.src = galleryName + "/" + firstImageName;
+          thumbnailImg.src = galleryName + "/" + getImageName(0, galleryData);
           thumbnailImg.alt = "Thumbnail";
           thumbnailImg.style.maxWidth = settings.thumbnailMaxWidth;
           thumbnailImg.style.maxHeight = settings.thumbnailMaxHeight;
@@ -164,8 +174,8 @@ SOFTWARE.
             } else {
               const defaultExtension = (galleryData.defaultExtension !== undefined) ?
                 galleryData.defaultExtension : settings.defaultExtension;
-              for (let i = 1; i <= galleryData.numImages; i++)
-                imageList.push(getImageName(i + defaultExtension, galleryData));
+              for (let i = 0; i < galleryData.numImages; i++)
+                imageList.push(getImageName(i, galleryData));
             }
             if (imageList.length !== 0) {
               currentGallery = galleryName;
@@ -181,7 +191,7 @@ SOFTWARE.
           const numImages = (galleryData.imageList !== undefined) ?
             galleryData.imageList.length : galleryData.numImages;
           thumbnailLabel.classList.add("thumbnail-label");
-          thumbnailLabel.textContent = galleryData.alt ?? galleryName;
+          thumbnailLabel.textContent = galleryData.altName ?? galleryName;
           thumbnailLabel.textContent += " (" + numImages + " images)";
           thumbnailListItem.appendChild(thumbnailLabel);
         }

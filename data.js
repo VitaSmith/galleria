@@ -21,11 +21,17 @@ const galleries = {
     numImages: 10,
   },
   "Gallery B": {
-    alt: "Some alternate gallery name",
+    altName: "Some alternate gallery name",
     numImages: 5,
   },
   "Gallery C": {
     numImages: 10,
+    // Sequential set of 10 images starting at 'DSFC0123.svg' and ending at 'DSFC134.svg',
+    // with images 'DSFC0125.svg' and 'DSFC0130.svg' skipped.
+    imagePrefix: "DSFC",
+    numberPadding: "0000",
+    firstImage: "DSFC0123.svg",
+    skipImage: [ "DSFC0125.svg", "DSFC0130.svg" ],
   },
   "Gallery D": {
     // If your images have random nonsequential names, you can provide them in an imageList.
