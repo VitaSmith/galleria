@@ -1,4 +1,4 @@
-/* Galleria - settings and data file */
+/* Galleria - Settings and data file */
 
 const settings = {
   // Set to true if you want large images to be zoomed out to fit the browser window.
@@ -28,7 +28,7 @@ const galleries = {
     altName: "Some alternate gallery name",
   },
   "Gallery C": {
-    // Sequential set of 10 images starting at 'DSFC0123.svg' and ending at 'DSFC134.svg',
+    // Sequential set of 10 images starting at 'DSFC0123.svg' and ending at 'DSFC0134.svg',
     // with images 'DSFC0125.svg' and 'DSFC0130.svg' skipped.
     numImages: 10,
     imagePrefix: "DSFC",
@@ -49,11 +49,12 @@ const galleries = {
     insertImage: { 0: "first.svg", 3: "extra.svg", 12: "last.svg" },
   },
   "Gallery F": {
+    numImages: 5,
+    numberPadding: "001",
     // Default image extension for this specific gallery (overrides the one from settings).
     defaultExtension: ".jpg",
     // If some images follow the sequential scheme but don't use the default extension, list
     // them in customExtension.
-    customExtension: [ "1.png", "4.jpeg" ],
-    numImages: 5,
+    customExtension: [ "001.png", "004.jpeg" ],
   },
 };
