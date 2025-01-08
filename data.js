@@ -21,15 +21,18 @@ const galleries = {
     numImages: 10,
   },
   "Gallery B": {
+    // Sequential gallery of 6 images starting at '0.svg' and ending at '5.svg'.
+    numImages: 6,
+    firstImage: "0.svg",
+    // Alternate display name for the gallery
     altName: "Some alternate gallery name",
-    numImages: 5,
   },
   "Gallery C": {
-    numImages: 10,
     // Sequential set of 10 images starting at 'DSFC0123.svg' and ending at 'DSFC134.svg',
     // with images 'DSFC0125.svg' and 'DSFC0130.svg' skipped.
+    numImages: 10,
     imagePrefix: "DSFC",
-    numberPadding: "0000",
+    numberPadding: "0001",
     firstImage: "DSFC0123.svg",
     skipImage: [ "DSFC0125.svg", "DSFC0130.svg" ],
   },
@@ -39,12 +42,17 @@ const galleries = {
     imageList: [ "random.svg", "set.svg", "of.svg", "image.svg", "files.svg" ],
   },
   "Gallery E": {
-    numImages: 10,
+    // Sequential gallery of 13 images starting at '1.svg' and ending at '10.svg' with extra
+    // images that don't follow the sequential scheme added at position 0 (first image), 3
+    // and 12 (last image)
+    numImages: 13,
+    insertImage: { 0: "first.svg", 3: "extra.svg", 12: "last.svg" },
   },
   "Gallery F": {
     // Default image extension for this specific gallery (overrides the one from settings).
     defaultExtension: ".jpg",
-    // If some images don't use the default extension, list them in customExtension.
+    // If some images follow the sequential scheme but don't use the default extension, list
+    // them in customExtension.
     customExtension: [ "1.png", "4.jpeg" ],
     numImages: 5,
   },

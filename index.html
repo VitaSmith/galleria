@@ -108,6 +108,10 @@ SOFTWARE.
         return galleryData.imageList[index];
       if (index === 0)
         skipped = 0;
+      if (galleryData.insertImage !== undefined && index in galleryData.insertImage) {
+        skipped--;
+        return galleryData.insertImage[index];
+      }
       const padding = (galleryData.numberPadding !== undefined) ? galleryData.numberPadding.length : 0;
       const prefix = (galleryData.imagePrefix !== undefined) ? galleryData.imagePrefix : "";
       let startNumber = 1;
@@ -159,8 +163,9 @@ SOFTWARE.
           thumbnailList.appendChild(thumbnailListItem);
 
           const thumbnailImg = document.createElement("img");
-          thumbnailImg.src = galleryName + "/" + getImageName(0, galleryData);
-          thumbnailImg.alt = "Thumbnail";
+          const imageName = getImageName(0, galleryData);
+          thumbnailImg.src = galleryName + "/" + imageName;
+          thumbnailImg.alt = "'" + imageName + "' not found";
           thumbnailImg.style.maxWidth = settings.thumbnailMaxWidth;
           thumbnailImg.style.maxHeight = settings.thumbnailMaxHeight;
           thumbnailListItem.appendChild(thumbnailImg);
@@ -206,7 +211,7 @@ SOFTWARE.
 
             const thumbnailImg = document.createElement("img");
             thumbnailImg.src = currentGallery + "/" + imageList[i];
-            thumbnailImg.alt = "Thumbnail";
+            thumbnailImg.alt = "'" + imageList[i] + "' not found";
             thumbnailImg.style.maxWidth = settings.thumbnailMaxWidth;
             thumbnailImg.style.maxHeight = settings.thumbnailMaxHeight;
             thumbnailListItem.appendChild(thumbnailImg);
@@ -231,6 +236,7 @@ SOFTWARE.
       const numImages = imageList.length;
       const imageName = imageList[currentIndex];
       imageView.src = currentGallery + "/" + imageName;
+      imageView.alt = "'" + imageName  + "' not found";
 
       if (fitToPage) {
         imageView.style.maxHeight = "100%";
