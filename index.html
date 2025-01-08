@@ -85,38 +85,71 @@ SOFTWARE.
     </div>
   </div>
   <script>
-    let currentGallery = null;
-    let currentIndex = 0;
-    let fitToPage = settings.fitToPage;
-    let singleImageMode = true;
-
     const thumbnailList = document.getElementById("thumbnailList");
     const imageView = document.getElementById("imageView");
     const imageViewer = document.getElementById("imageViewer");
     const imageContainer = document.getElementById("imageContainer");
 
-    let displayedElements = [];
+    let currentGallery = null;
+    let currentIndex = 0;
+    let fitToPage = settings.fitToPage;
+    let singleImageMode = true;
+    let galleryNames = [];
+    let imageList = [];
 
     // Set the style
     document.body.style.color = settings.defaultTextColor;
     document.body.style.background = settings.defaultBackgroundColor;
+
+    // Apply an optional customExtension override to a sequential image name
+    function getImageName(imageName, galleryData) {
+      if (galleryData.customExtension === undefined)
+        return imageName;
+      for (const customExtension of galleryData.customExtension) {
+        // + 1 so that we include the dot in the comparison
+        var pos = customExtension.lastIndexOf('.') + 1;
+        if (pos === 0)
+          continue;
+        if (imageName.substring(0, pos) == customExtension.substring(0, pos))
+          return customExtension;
+      }
+      return imageName;
+    }
 
     // Create gallery thumbnails and labels
     function createThumbnails() {
       thumbnailList.innerHTML = "";
       if (!currentGallery) {
         // Global mode, where we display the first image of each gallery
-        displayedElements = Object.keys(galleries);
+        galleryNames = Object.keys(galleries);
 
-        displayedElements.forEach((galleryName) => {
+        for (const galleryName of galleryNames) {
           const galleryData = galleries[galleryName];
+
+          // Eliminate empty galleries
+          if (galleryData.imageList !== undefined) {
+            if (galleryData.imageList.length == 0)
+              return;
+          } else if (galleryData.numImages == undefined || galleryData.numImages === 0) {
+            return;
+          }
 
           const thumbnailListItem = document.createElement("div");
           thumbnailListItem.classList.add("thumbnail-list-item");
           thumbnailList.appendChild(thumbnailListItem);
 
           const thumbnailImg = document.createElement("img");
-          thumbnailImg.src = galleryName + "/1" + settings.defaultExtension;
+          let firstImageName = null;
+          if (galleryData.imageList !== undefined) {
+            // If we have a straight imageList, use the first entry
+            firstImageName = galleryData.imageList[0];
+          } else {
+            // Otherwise, build the first image name from the gallery data
+            const defaultExtension = (galleryData.defaultExtension !== undefined) ?
+              galleryData.defaultExtension : settings.defaultExtension;
+            firstImageName = getImageName("1" + defaultExtension, galleryData);
+          }
+          thumbnailImg.src = galleryName + "/" + firstImageName;
           thumbnailImg.alt = "Thumbnail";
           thumbnailImg.style.maxWidth = settings.thumbnailMaxWidth;
           thumbnailImg.style.maxHeight = settings.thumbnailMaxHeight;
@@ -124,31 +157,45 @@ SOFTWARE.
 
           // Open the first image of the gallery on click
           thumbnailListItem.addEventListener("click", () => {
-            currentGallery = galleryName;
-            currentIndex = 0;
-            updateImage();
-            thumbnailList.style.display = "none";
-            imageViewer.style.display = "block";
+            imageList = [];
+            // Construct the list of all the images in the gallery
+            if (galleryData.imageList !== undefined) {
+              imageList = galleryData.imageList;
+            } else {
+              const defaultExtension = (galleryData.defaultExtension !== undefined) ?
+                galleryData.defaultExtension : settings.defaultExtension;
+              for (let i = 1; i <= galleryData.numImages; i++)
+                imageList.push(getImageName(i + defaultExtension, galleryData));
+            }
+            if (imageList.length !== 0) {
+              currentGallery = galleryName;
+              currentIndex = 0;
+              updateImage();
+              thumbnailList.style.display = "none";
+              imageViewer.style.display = "block";
+            }
           });
 
           // Set the label
           const thumbnailLabel = document.createElement("span");
+          const numImages = (galleryData.imageList !== undefined) ?
+            galleryData.imageList.length : galleryData.numImages;
           thumbnailLabel.classList.add("thumbnail-label");
           thumbnailLabel.textContent = galleryData.alt ?? galleryName;
-          thumbnailLabel.textContent += " (" + galleryData.numImages + " images)";
+          thumbnailLabel.textContent += " (" + numImages + " images)";
           thumbnailListItem.appendChild(thumbnailLabel);
-        });
+        }
       } else if (!singleImageMode) {
           // Gallery mode, where we display all the pages from a gallery as thumbnails
           const galleryData = galleries[currentGallery];
 
-          for (let i = 1; i <= galleryData.numImages; i++) {
+          for (let i = 0; i < imageList.length; i++) {
             const thumbnailListItem = document.createElement("div");
             thumbnailListItem.classList.add("thumbnail-list-item");
             thumbnailList.appendChild(thumbnailListItem);
 
             const thumbnailImg = document.createElement("img");
-            thumbnailImg.src = currentGallery + "/" + i + settings.defaultExtension;
+            thumbnailImg.src = currentGallery + "/" + imageList[i];
             thumbnailImg.alt = "Thumbnail";
             thumbnailImg.style.maxWidth = settings.thumbnailMaxWidth;
             thumbnailImg.style.maxHeight = settings.thumbnailMaxHeight;
@@ -156,7 +203,7 @@ SOFTWARE.
 
             // Open the selected image on click
             thumbnailListItem.addEventListener("click", () => {
-              currentIndex = i - 1;
+              currentIndex = i;
               updateImage();
               thumbnailList.style.display = "none";
               imageViewer.style.display = "block";
@@ -171,8 +218,8 @@ SOFTWARE.
       if (!currentGallery)
         return;
       const galleryData = galleries[currentGallery];
-      const numImages = galleryData.numImages;
-      const imageName = String(currentIndex + 1) + settings.defaultExtension;
+      const numImages = imageList.length;
+      const imageName = imageList[currentIndex];
       imageView.src = currentGallery + "/" + imageName;
 
       if (fitToPage) {
@@ -191,14 +238,14 @@ SOFTWARE.
     imageView.addEventListener("click", (event) => {
       if (currentGallery) {
         const galleryData = galleries[currentGallery];
-        const numImages = galleryData.numImages;
+        const numImages = imageList.length;
         const imageWidth = imageView.clientWidth;
         // Check if the click is on the left or right side of the image
         const isLeftSideClick = (event.clientX - imageView.getBoundingClientRect().left <= imageWidth / 2);
 
         if (
           (isLeftSideClick && currentIndex === 0) ||
-          (!isLeftSideClick && currentIndex === galleries[currentGallery].numImages - 1)
+          (!isLeftSideClick && currentIndex === numImages - 1)
         ) {
           // Go back to the gallery list if it's the first or last image
           currentGallery = null;
