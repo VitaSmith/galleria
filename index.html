@@ -91,7 +91,8 @@ SOFTWARE.
     const imageContainer = document.getElementById("imageContainer");
 
     let currentGallery = null;
-    let currentIndex = 0;
+    let currentGalleryIndex = 0;
+    let currentImageIndex = 0;
     let fitToPage = settings.fitToPage;
     let singleImageMode = true;
     let galleryNames = [];
@@ -141,14 +142,25 @@ SOFTWARE.
     }
 
     // Create gallery thumbnails and labels
-    function createThumbnails() {
+    function createThumbnails(index) {
       thumbnailList.innerHTML = "";
+
+      // Scroll back to the current image in the thumbnail list
+      const observer = new MutationObserver((mutations, obs) => {
+        const visibleThumbnail = document.getElementById(index);
+        if (visibleThumbnail) {
+          setTimeout(function() { visibleThumbnail.scrollIntoView() }, 0);
+          obs.disconnect();
+        }
+      });
+      observer.observe(document, { childList: true, subtree: true });
+
       if (!currentGallery) {
         // Global mode, where we display the first image of each gallery
-        galleryNames = Object.keys(galleries);
+        galleryName = Object.keys(galleries);
 
-        for (const galleryName of galleryNames) {
-          const galleryData = galleries[galleryName];
+        for (let i = 0; i < galleryName.length; i++) {
+          const galleryData = galleries[galleryName[i]];
 
           // Eliminate empty galleries
           if (galleryData.imageList !== undefined) {
@@ -160,11 +172,12 @@ SOFTWARE.
 
           const thumbnailListItem = document.createElement("div");
           thumbnailListItem.classList.add("thumbnail-list-item");
+          thumbnailListItem.setAttribute("id", i);
           thumbnailList.appendChild(thumbnailListItem);
 
           const thumbnailImg = document.createElement("img");
           const imageName = getImageName(0, galleryData);
-          thumbnailImg.src = galleryName + "/" + imageName;
+          thumbnailImg.src = galleryName[i] + "/" + imageName;
           thumbnailImg.alt = "'" + imageName + "' not found";
           thumbnailImg.style.maxWidth = settings.thumbnailMaxWidth;
           thumbnailImg.style.maxHeight = settings.thumbnailMaxHeight;
@@ -183,8 +196,9 @@ SOFTWARE.
                 imageList.push(getImageName(i, galleryData));
             }
             if (imageList.length !== 0) {
-              currentGallery = galleryName;
-              currentIndex = 0;
+              currentGallery = galleryName[i];
+              currentGalleryIndex = i;
+              currentImageIndex = 0;
               updateImage();
               thumbnailList.style.display = "none";
               imageViewer.style.display = "block";
@@ -196,7 +210,7 @@ SOFTWARE.
           const numImages = (galleryData.imageList !== undefined) ?
             galleryData.imageList.length : galleryData.numImages;
           thumbnailLabel.classList.add("thumbnail-label");
-          thumbnailLabel.textContent = galleryData.altName ?? galleryName;
+          thumbnailLabel.textContent = galleryData.altName ?? galleryName[i];
           thumbnailLabel.textContent += " (" + numImages + " images)";
           thumbnailListItem.appendChild(thumbnailLabel);
         }
@@ -207,6 +221,7 @@ SOFTWARE.
           for (let i = 0; i < imageList.length; i++) {
             const thumbnailListItem = document.createElement("div");
             thumbnailListItem.classList.add("thumbnail-list-item");
+            thumbnailListItem.setAttribute("id", i);
             thumbnailList.appendChild(thumbnailListItem);
 
             const thumbnailImg = document.createElement("img");
@@ -218,7 +233,7 @@ SOFTWARE.
 
             // Open the selected image on click
             thumbnailListItem.addEventListener("click", () => {
-              currentIndex = i;
+              currentImageIndex = i;
               updateImage();
               thumbnailList.style.display = "none";
               imageViewer.style.display = "block";
@@ -234,7 +249,7 @@ SOFTWARE.
         return;
       const galleryData = galleries[currentGallery];
       const numImages = imageList.length;
-      const imageName = imageList[currentIndex];
+      const imageName = imageList[currentImageIndex];
       imageView.src = currentGallery + "/" + imageName;
       imageView.alt = "'" + imageName  + "' not found";
 
@@ -260,8 +275,8 @@ SOFTWARE.
         const isLeftSideClick = (event.clientX - imageView.getBoundingClientRect().left <= imageWidth / 2);
 
         if (
-          (isLeftSideClick && currentIndex === 0) ||
-          (!isLeftSideClick && currentIndex === numImages - 1)
+          (isLeftSideClick && currentImageIndex === 0) ||
+          (!isLeftSideClick && currentImageIndex === numImages - 1)
         ) {
           // Go back to the gallery list if it's the first or last image
           currentGallery = null;
@@ -271,11 +286,11 @@ SOFTWARE.
           createThumbnails();
         } else if (isLeftSideClick) {
           // Go to the previous image
-          currentIndex = (currentIndex - 1) % numImages;
+          currentImageIndex = (currentImageIndex - 1) % numImages;
           updateImage();
         } else {
           // Go to the next image
-          currentIndex = (currentIndex + 1) % numImages;
+          currentImageIndex = (currentImageIndex + 1) % numImages;
           updateImage();
         }
       }
@@ -292,14 +307,14 @@ SOFTWARE.
           thumbnailList.style.display = "flex";
           imageViewer.style.display = "none";
           imageView.src = "";
-          createThumbnails();
+          createThumbnails(currentImageIndex);
         } else if (event.key === "Escape") {
           currentGallery = null;
           singleImageMode = true;
           thumbnailList.style.display = "flex";
           imageViewer.style.display = "none";
           imageView.src = "";
-          createThumbnails();
+          createThumbnails(currentGalleryIndex);
         }
       }
     });

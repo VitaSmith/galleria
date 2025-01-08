@@ -6,7 +6,7 @@ A self-contained HTML5 local gallery viewer.
   - [Description](#description)
   - [Features](#features)
   - [Usage](#usage)
-    - [Navigation and keybiddings](#navigation-and-keybiddings)
+    - [Navigation and keybindings](#navigation-and-keybindings)
     - [Examples](#examples)
 
 ## Description
@@ -37,7 +37,7 @@ you have a set of subfolders containing image sets of photos, comics/mangas, etc
 Edit `data.js` according to the layout of your image sets (or use a script to generate
 `data.js` for you) and open `index.html` in your browser to navigate/view the galleries.
 
-### Navigation and keybidings
+### Navigation and keybindings
 
 All thumbnail images are clickable and, when clicked, will show the corresponding image in
 the browser. You can then click on the right part of that image to navigate to the next
@@ -53,7 +53,7 @@ Pressing <kbd>F</kbd> when viewing an image toggles between "fit to screen" and 
 
 ### Examples
 
-The following assumes that you have `defaultExtension: ".jpg"` in the `data.js` `settings`.
+The following assumes that you have `defaultExtension: ".jpg"` in the `data.js`'s `settings`.
 
 - Add a gallery, labelled `Gallery A` using the sequence of images `./Gallery A/1.jpg` to
 `./Gallery A/10.jpg`.

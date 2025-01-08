@@ -57,4 +57,6 @@ const galleries = {
     // them in customExtension.
     customExtension: [ "001.png", "004.jpeg" ],
   },
+  // Uncomment this after running 'gen_gallery.sh', to test a very large set of images.
+  // "Gallery G": { numImages: 2000 },
 };
