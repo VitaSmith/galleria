@@ -12,7 +12,10 @@ const settings = {
   // Default backgroung color
   defaultBackgroundColor: "black",
   // Default text color
-  defaultTextColor: "white",
+  defaultTextColor: "lightgrey",
+  // Defauilt font family and style
+  defaultFont: "Tahoma",
+  defaultFontStyle: "italic",
 };
 
 const galleries = {
@@ -25,7 +28,7 @@ const galleries = {
     numImages: 6,
     firstImage: "0.svg",
     // Alternate display name for the gallery
-    altName: "Some alternate gallery name",
+    altName: "Some super, long-ass, mega long, but really rea-hee-hee-heally long alternate gallery name that could probably be even longer",
   },
   "Gallery C": {
     // Sequential set of 10 images starting at 'DSFC0123.svg' and ending at 'DSFC0134.svg',
@@ -40,6 +43,7 @@ const galleries = {
     // If your images have random nonsequential names, you can provide them in an imageList.
     // Note that imageList takes precedence over all other image naming options.
     imageList: [ "random.svg", "set.svg", "of.svg", "image.svg", "files.svg" ],
+    altName: "How long can this gallery label be I don't know you tell me okay that should do",
   },
   "Gallery E": {
     // Sequential gallery of 13 images starting at '1.svg' and ending at '10.svg' with extra

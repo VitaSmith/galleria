@@ -58,6 +58,7 @@ SOFTWARE.
     .thumbnail-label {
       font-size: 18px;
       margin-top: 10px;
+      text-align : center;
     }
     .image-viewer {
       width: 100vw;
@@ -102,6 +103,8 @@ SOFTWARE.
     // Set the style
     document.body.style.color = settings.defaultTextColor;
     document.body.style.background = settings.defaultBackgroundColor;
+    document.body.style.fontFamily = settings.defaultFont;
+    document.body.style.fontStyle = settings.defaultFontStyle;
 
     // Get the nth image name from a gallery according to all settings and options
     function getImageName(index, galleryData) {
@@ -177,8 +180,11 @@ SOFTWARE.
 
           const thumbnailImg = document.createElement("img");
           const imageName = getImageName(0, galleryData);
+          const numImages = (galleryData.imageList !== undefined) ?
+            galleryData.imageList.length : galleryData.numImages;
           thumbnailImg.src = galleryName[i] + "/" + imageName;
           thumbnailImg.alt = "'" + imageName + "' not found";
+          thumbnailImg.title = numImages + " image" + ((numImages === 1) ? "" : "s");
           thumbnailImg.style.maxWidth = settings.thumbnailMaxWidth;
           thumbnailImg.style.maxHeight = settings.thumbnailMaxHeight;
           thumbnailListItem.appendChild(thumbnailImg);
@@ -207,11 +213,9 @@ SOFTWARE.
 
           // Set the label
           const thumbnailLabel = document.createElement("span");
-          const numImages = (galleryData.imageList !== undefined) ?
-            galleryData.imageList.length : galleryData.numImages;
           thumbnailLabel.classList.add("thumbnail-label");
+          thumbnailLabel.style.maxWidth = settings.thumbnailMaxWidth;
           thumbnailLabel.textContent = galleryData.altName ?? galleryName[i];
-          thumbnailLabel.textContent += " (" + numImages + " images)";
           thumbnailListItem.appendChild(thumbnailLabel);
         }
       } else if (!singleImageMode) {
