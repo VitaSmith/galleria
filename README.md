@@ -43,6 +43,9 @@ All thumbnail images are clickable and, when clicked, will show the correspondin
 the browser. You can then click on the right part of that image to navigate to the next
 image, or on the left part to go back.
 
+Alternatively, you can use the direction arrows <kbd>←</kbd> and <kbd>→</kbd> keys to go
+forward/backward, as well as the <kbd>PageUp</kbd> and <kbd>PageDown</kbd> keys.
+
 Going back on the first image or forward on the last image will bring you back to the global
 gallery view. Or you can also just press <kbd>Esc</kbd> at any time to do so.
 

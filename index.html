@@ -249,54 +249,57 @@ SOFTWARE.
 
     // Update the image and handle click events
     function updateImage() {
-      if (!currentGallery)
-        return;
-      const galleryData = galleries[currentGallery];
-      const numImages = imageList.length;
-      const imageName = imageList[currentImageIndex];
-      imageView.src = currentGallery + "/" + imageName;
-      imageView.alt = "'" + imageName  + "' not found";
+      if (currentGallery) {
+        const galleryData = galleries[currentGallery];
+        const numImages = imageList.length;
+        const imageName = imageList[currentImageIndex];
+        imageView.src = currentGallery + "/" + imageName;
+        imageView.alt = "'" + imageName  + "' not found";
 
-      if (fitToPage) {
-        imageView.style.maxHeight = "100%";
-        imageView.style.maxWidth = "100%";
-        imageContainer.style.width = "100vw";
-        imageContainer.style.height = "100vh";
+        if (fitToPage) {
+          imageView.style.maxHeight = "100%";
+          imageView.style.maxWidth = "100%";
+          imageContainer.style.width = "100vw";
+          imageContainer.style.height = "100vh";
+        } else {
+          imageView.style.maxHeight = "none";
+          imageView.style.maxWidth = "none";
+          imageContainer.style.width = "auto";
+          imageContainer.style.height = "auto";
+        }
+      }
+    }
+
+    function switchImage(forward) {
+      const numImages = imageList.length;
+      if (
+        (!forward && currentImageIndex === 0) ||
+        (forward && currentImageIndex === numImages - 1)
+      ) {
+        // Go back to the gallery list if it's the first or last image
+        currentGallery = null;
+        thumbnailList.style.display = "flex";
+        imageViewer.style.display = "none";
+        imageView.src = "";
+        createThumbnails(currentGalleryIndex);
+      } else if (forward) {
+        // Go to the next image
+        currentImageIndex = (currentImageIndex + 1) % numImages;
+        updateImage();
       } else {
-        imageView.style.maxHeight = "none";
-        imageView.style.maxWidth = "none";
-        imageContainer.style.width = "auto";
-        imageContainer.style.height = "auto";
+        // Go to the previous image
+        currentImageIndex = (currentImageIndex - 1) % numImages;
+        updateImage();
       }
     }
 
     imageView.addEventListener("click", (event) => {
       if (currentGallery) {
         const galleryData = galleries[currentGallery];
-        const numImages = imageList.length;
         const imageWidth = imageView.clientWidth;
         // Check if the click is on the left or right side of the image
-        const isLeftSideClick = (event.clientX - imageView.getBoundingClientRect().left <= imageWidth / 2);
-
-        if (
-          (isLeftSideClick && currentImageIndex === 0) ||
-          (!isLeftSideClick && currentImageIndex === numImages - 1)
-        ) {
-          // Go back to the gallery list if it's the first or last image
-          currentGallery = null;
-          thumbnailList.style.display = "flex";
-          imageViewer.style.display = "none";
-          imageView.src = "";
-          createThumbnails();
-        } else if (isLeftSideClick) {
-          // Go to the previous image
-          currentImageIndex = (currentImageIndex - 1) % numImages;
-          updateImage();
-        } else {
-          // Go to the next image
-          currentImageIndex = (currentImageIndex + 1) % numImages;
-          updateImage();
-        }
+        const forward = (event.clientX - imageView.getBoundingClientRect().left > imageWidth / 2);
+        switchImage(forward);
       }
     });
 
@@ -312,6 +315,10 @@ SOFTWARE.
           imageViewer.style.display = "none";
           imageView.src = "";
           createThumbnails(currentImageIndex);
+        } else if (singleImageMode && (event.key === "ArrowRight" || event.key === "PageDown")) {
+          switchImage(true);
+        } else if (singleImageMode && (event.key === "ArrowLeft" || event.key === "PageUp")) {
+          switchImage(false);
         } else if (event.key === "Escape") {
           currentGallery = null;
           singleImageMode = true;
