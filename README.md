@@ -7,6 +7,7 @@ A self-contained HTML5 local gallery viewer.
   - [Features](#features)
   - [Usage](#usage)
     - [Navigation and keybindings](#navigation-and-keybindings)
+    - [Data file generation](#data-file-generation)
     - [Examples](#examples)
 
 ## Description
@@ -15,7 +16,7 @@ Galleria is a no-dependencies HTML5 gallery viewer that can be used with any mod
 to browse a set of local galleries, such as photo albums, comics/mangas, etc.
 
 It is designed for the express purpose of being lightweight, self-contained, and easily
-configurable, through the editing of a simple local `data.js` file.
+configurable, through the editing of a simple local `galleria.js` file.
 
 Considering that every modern browser already has everything required, natively, to provide
 great gallery visualization, our design aims at giving you what actually matters (the actual
@@ -31,11 +32,14 @@ image data, in all its glory) without the unnecessary, and oft unwanted, distrac
 
 ## Usage
 
-Download `index.html` and `data.js` from this repository and copy them to the folder where
+Download the `galleria.*` files from this repository and copy them to the folder where
 you have a set of subfolders containing image sets of photos, comics/mangas, etc.
 
-Edit `data.js` according to the layout of your image sets (or use a script to generate
-`data.js` for you) and open `index.html` in your browser to navigate/view the galleries.
+Then either edit `galleria.js` manually according to the layout of your image sets (or, if
+you have bash shell available, run `./galleria.sh` to automatically generate a `galleria.js`
+for you.
+
+Once that is done, open `galleria.html` in your browser to navigate/view the galleries.
 
 ### Navigation and keybindings
 
@@ -54,9 +58,23 @@ clickable thumbnails.
 
 Pressing <kbd>F</kbd> when viewing an image toggles between "fit to screen" and actual size.
 
+### Data file generation
+
+Obviously, a local gallery visualizer is only as good as the utility that automates the
+creation of its source data from your local images, so we are also providing a bash script
+that helps doing that on Linux and MacOS (and we might also provide a PowerShell script that
+does the same for Windows in the future).
+
+The script is designed to output the gallery data on the commandline, while automatically
+handling prefixing, number padding, missing or added images, default/additional extensions
+and so on.
+
+What this means is that, as long as your images don't use a crazy ordering scheme, you
+shouldn't have to do any work at all adding a whole set of galleries to Galleria.
+
 ### Examples
 
-The following assumes that you have `defaultExtension: ".jpg"` in the `data.js`'s `settings`.
+The following assumes that you have `defaultExtension: ".jpg"` in `galleria.js`.
 
 - Add a gallery, labelled `Gallery A` using the sequence of images `./Gallery A/1.jpg` to
 `./Gallery A/10.jpg`.
@@ -123,5 +141,8 @@ The following assumes that you have `defaultExtension: ".jpg"` in the `data.js`'
   },
 ```
 
-For more details, see the default `data.js` from this repository, along with the sample
-galleries provided.
+For more details, see the default `galleria.js` from this repository, along with the sample
+galleries provided. And as you will see, outside of elements that are impossible to guess
+(such as where extra images should be inserted, or what order should a list of unnumbered
+images be, if not alpahetical), the `galleria.sh` script is smart enough to automatically
+generate the gallery layouts above, just by looking at the content of the folders.
