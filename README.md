@@ -61,11 +61,10 @@ Pressing <kbd>F</kbd> when viewing an image toggles between "fit to screen" and 
 ### Data file generation
 
 Obviously, a local gallery visualizer is only as good as the utility that automates the
-creation of its source data from your local images, so we are also providing a bash script
-that helps doing that on Linux and MacOS (and we might also provide a PowerShell script that
-does the same for Windows in the future).
+creation of its source data from your local images, so we are also providing two scripts
+(PowerShell and bash) that help doing that on Windows, Linux and MacOS.
 
-The script is designed to output the gallery data on the commandline, while automatically
+Each script is designed to output the gallery data on the commandline, while automatically
 handling prefixing, number padding, missing or added images, default/additional extensions
 and so on.
 

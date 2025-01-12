@@ -42,7 +42,6 @@ for dir in "${dirs[@]}"; do
 
   skip_gallery=0
   dir=${dir::-1}
-  cd "$dir"
 
   # Bash doesn't allow the use of variables inside wildcard, so we have to repeat the exts
   files=($(ls -v *.{bmp,gif,jpeg,jpg,png,tga,tif,svg,webp} 2> /dev/null))
@@ -51,6 +50,8 @@ for dir in "${dirs[@]}"; do
   if [[ ${#files[@]} == 0 ]]; then
     continue
   fi
+
+  cd "$dir"
 
   # Try to guess the pattern from the first file listed
   first_file=${files[0]}
