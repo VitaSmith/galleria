@@ -1,7 +1,7 @@
 #!/bin/env bash
 # Generate data for galleria from a set of image folders in the current directory
 
-# Change this to your preferred extension
+# Default settings
 default_ext=".jpg"
 
 # You should not have to change anything below this

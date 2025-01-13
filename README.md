@@ -60,9 +60,10 @@ Pressing <kbd>F</kbd> when viewing an image toggles between "fit to screen" and 
 
 ### Data file generation
 
-Obviously, a local gallery visualizer is only as good as the utility that automates the
-creation of its source data from your local images, so we are also providing two scripts
-(PowerShell and bash) that help doing that on Windows, Linux and MacOS.
+Obviously, a local gallery visualizer is only as good as the utilities that can automate the
+generation of the gallery data (in our case, that would be the generation of `galleria.js),
+so we are providing not one, not two, but **three** scripts (bash, PowerShell and python)
+that can help you do just that on Windows, Linux, MacOS or any other Operating System.
 
 Each script is designed to output the gallery data on the commandline, while automatically
 handling prefixing, number padding, missing or added images, default/additional extensions

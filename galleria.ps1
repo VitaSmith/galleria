@@ -1,9 +1,10 @@
 # Generate data for Galleria from a set of image folders in the current directory
 
-# Default image extension
+# Default settings
 $default_ext = ".jpg"
+$extensions = @(".bmp", ".gif", ".jpeg", ".jpg", ".png", ".tga", ".tif", ".svg", ".webp")
 
-# Output JavaScript header
+# You should not have to change anything below this
 @"
 /* Galleria - Settings and data file */
 
@@ -26,8 +27,7 @@ const settings = {
 };
 "@
 
-# Supported extensions
-$extensions = @(".bmp", ".gif", ".jpeg", ".jpg", ".png", ".tga", ".tif", ".svg", ".webp")
+
 
 Write-Output "const galleries = {"
 
