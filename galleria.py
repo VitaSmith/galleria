@@ -22,29 +22,6 @@ json_convert = {
   "comments": "comments",
 }
 
-# Output JavaScript header
-settings = f"""/* Galleria - Settings and data file */
-
-const settings = {{
-  // Set to true if you want large images to be zoomed out to fit the browser window.
-  // Set to false otherwise. Can also be toggled when viewing images with the <F> key.
-  fitToPage: true,
-  // Default image extension (can be overridden on a gallery by gallery basis).
-  defaultExtension: "{default_ext}",
-  // Maximum default dimensions for thumbnails.
-  thumbnailMaxWidth: "400px",
-  thumbnailMaxHeight: "400px",
-  // Default backgroung color
-  defaultBackgroundColor: "black",
-  // Default text color
-  defaultTextColor: "lightgrey",
-  // Defauilt font family and style
-  defaultFont: "Tahoma",
-  defaultFontStyle: "italic",
-}};
-"""
-
-print(settings)
 print("const galleries = {")
 
 # Get all directories in the current directory
