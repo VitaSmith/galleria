@@ -4,6 +4,19 @@
 $default_ext = ".jpg"
 $extensions = @(".bmp", ".gif", ".jpeg", ".jpg", ".png", ".tga", ".tif", ".svg", ".webp")
 
+# If you have JSON data in your image folder, you can insert some of its values into
+# your 'galleria.js'. For instance, if you have 'title' defined as a JSON value, the
+# following will insert it as 'altName' so that Galleria sets it as the gallery name.
+# Alternatively, you can also insert the JSON data as is, such as 'artist' or 'tags'.
+$data_json = "data.json"
+$json_convert = @{
+  "title" = "altName"
+  "artist" = "artist"
+  "type" = "type"
+  "tags" = "tags"
+  "comments" = "comments"
+}
+
 # You should not have to change anything below this
 @"
 /* Galleria - Settings and data file */
@@ -27,8 +40,6 @@ const settings = {
 };
 "@
 
-
-
 Write-Output "const galleries = {"
 
 # Get directories in the current folder
@@ -45,6 +56,17 @@ foreach ($dir in $directories) {
     continue
   }
 
+  # Check if we have JSON data and read values from it if so
+  $json_insert = @{}
+  if (Get-ChildItem -Path $dir $data_json) {
+    $json = Get-Content -Path (Join-Path $dir $data_json) -Raw | ConvertFrom-Json
+    foreach ($k in $json_convert.keys) {
+      if ($json."$k") {
+        $json_insert[$json_convert[$k]] = $json."$k"
+      }
+    }
+  }
+
   # Try to guess the pattern from the first file listed
   $first_file = $files[0].BaseName
   $prefix = $first_file -replace "\d", ""
@@ -53,6 +75,12 @@ foreach ($dir in $directories) {
   # Add the gallery header
   Write-Output "  `"$($dir.Name)`": {"
   Write-Output "    numImages: $($files.Count),"
+
+  # Output the processed JSON data
+  foreach ($k in $json_insert.keys) {
+    $v = $json_insert[$k] | ConvertTo-Json -Compress
+    Write-Output "    $k`: $v,"
+  }
 
   if (-not $remainder -or ($prefix + $remainder) -ne $first_file) {
     # Output all files as a list

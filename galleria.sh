@@ -3,6 +3,22 @@
 
 # Default settings
 default_ext=".jpg"
+# NB: If you modify these, you must also edit the duplicate in 'files=($(ls -v ... ))'
+extensions=(".bmp" ".gif" ".jpeg" ".jpg" ".png" ".tga" ".tif" ".svg" ".webp")
+
+# If you have JSON data in your image folder, you can insert some of its values into
+# your 'galleria.js'. For instance, if you have 'title' defined as a JSON value, the
+# following will insert it as 'altName' so that Galleria sets it as the gallery name.
+# Alternatively, you can also insert the JSON data as is, such as 'artist' or 'tags'.
+# Note that this require the 'jq' command to be available on your platform.
+data_json="data.json"
+declare -A json_convert=(
+  ["title"]="altName"
+  ["artist"]="artist"
+  ["type"]="type"
+  ["tags"]="tags"
+  ["comments"]="comments"
+)
 
 # You should not have to change anything below this
 cat << EOF
@@ -32,8 +48,6 @@ EOF
 IFS='
 '
 
-exts=(".bmp" ".gif" ".jpeg" ".jpg" ".png" ".tga" ".tif" ".svg" ".webp")
-
 echo "const galleries = {"
 
 # Using -v ensures natural sorting of directories (i.e '11/' listed before '101/')
@@ -42,16 +56,28 @@ for dir in "${dirs[@]}"; do
 
   skip_gallery=0
   dir=${dir::-1}
+  cd "$dir"
 
-  # Bash doesn't allow the use of variables inside wildcard, so we have to repeat the exts
+  # Bash doesn't allow the use of variables inside wildcard, so we have to repeat the extensions
   files=($(ls -v *.{bmp,gif,jpeg,jpg,png,tga,tif,svg,webp} 2> /dev/null))
 
   # Ignore folders with no images
   if [[ ${#files[@]} == 0 ]]; then
+    cd ..
     continue
   fi
 
-  cd "$dir"
+  # Check if we have JSON data and read values from it if so
+  unset json_insert
+  declare -A json_insert
+  if [[ -f "$data_json" && -x "$(command -v jq)" ]]; then
+    for k in "${!json_convert[@]}"; do
+      v=$(jq -cr ".$k" "$data_json")
+      if [[ "$v" != "null" ]]; then
+        json_insert["${json_convert[$k]}"]="$v"
+      fi
+    done
+  fi
 
   # Try to guess the pattern from the first file listed
   first_file=${files[0]}
@@ -66,6 +92,17 @@ for dir in "${dirs[@]}"; do
   echo "  \"${dir}\": {"
   echo "    numImages: ${#files[@]},"
 
+  # Output the processed JSON data
+  for k in "${!json_insert[@]}"; do
+    v="${json_insert[$k]}"
+    # Add double quotes as needed
+    if [[ ${v:0:1} != '"' && ${v:0:1} != '[' && ${v:0:1} != '{' ]]; then
+      echo "    $k: \"${json_insert[$k]}\","
+    else
+      echo "    $k: ${json_insert[$k]},"
+    fi
+  done
+
   if [[ -z "$rem" || "$prefix$rem" != "$first_file" ]]; then
 
     # Can't build a numeric sequence => just ouptut all the files as a list
@@ -79,7 +116,7 @@ for dir in "${dirs[@]}"; do
 
     # Count the number of files for each extension
     declare -A ext_count
-    for ext in "${exts[@]}"; do
+    for ext in "${extensions[@]}"; do
       ext_count[$ext]=0
       for file in "${files[@]}"; do
         if [[ "$file" == *"$ext" ]]; then
@@ -89,7 +126,7 @@ for dir in "${dirs[@]}"; do
     done
     last_count=0
     gallery_default_ext=""
-    for ext in "${exts[@]}"; do
+    for ext in "${extensions[@]}"; do
       if (( ${ext_count[$ext]} > $last_count )); then
         gallery_default_ext=$ext
         last_count=${ext_count[$ext]}
@@ -129,6 +166,7 @@ for dir in "${dirs[@]}"; do
     if (( skip_gallery != 0 )); then
       echo "    // FAILED TO PROCESS GALLERY"
       echo "  },"
+      cd ..
       continue;
     fi
 
@@ -185,7 +223,6 @@ for dir in "${dirs[@]}"; do
 
   # Add the gallery footer
   echo "  },"
-
   cd ..
 
 done

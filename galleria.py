@@ -1,12 +1,26 @@
 # Generate data for Galleria from a set of image folders in the current directory
 import os
 import re
+import json
 from pathlib import Path
 from collections import defaultdict
 
 # Default settings
 default_ext = ".jpg"
 extensions = [".bmp", ".gif", ".jpeg", ".jpg", ".png", ".tga", ".tif", ".svg", ".webp"]
+
+# If you have JSON data in your image folder, you can insert some of its values into
+# your 'galleria.js'. For instance, if you have 'title' defined as a JSON value, the
+# following will insert it as 'altName' so that Galleria sets it as the gallery name.
+# Alternatively, you can also insert the JSON data as is, such as 'artist' or 'tags'.
+data_json = "data.json"
+json_convert = {
+  "title": "altName",
+  "artist": "artist",
+  "type": "type",
+  "tags": "tags",
+  "comments": "comments",
+}
 
 # Output JavaScript header
 settings = f"""/* Galleria - Settings and data file */
@@ -49,6 +63,16 @@ for directory in sorted(directories, key=natural_order):
     if not files:
         continue
 
+    # Check if we have JSON data and read values from it if so
+    json_insert = {}
+    data_file = os.path.join(directory, data_json)
+    if (os.path.isfile(data_file)):
+        with open(data_file) as f:
+            jdata = json.load(f)
+            for key in json_convert:
+                if key in jdata:
+                    json_insert[json_convert[key]] = jdata[key]
+
     # Guess pattern from the first file
     first_file = files[0].stem
     prefix = ''.join([c for c in first_file if not c.isdigit()])
@@ -56,6 +80,10 @@ for directory in sorted(directories, key=natural_order):
 
     print(f'  "{directory.name}": {{')
     print(f'    numImages: {len(files)},')
+
+    # Output the processed JSON data
+    for key in json_insert:
+        print(f'    {key}: {json.dumps(json_insert[key])},')
 
     if not remainder or not first_file.startswith(prefix + remainder):
         # Output all files as a list

@@ -61,7 +61,7 @@ Pressing <kbd>F</kbd> when viewing an image toggles between "fit to screen" and 
 ### Data file generation
 
 Obviously, a local gallery visualizer is only as good as the utilities that can automate the
-generation of the gallery data (in our case, that would be the generation of `galleria.js),
+generation of the gallery data (in our case, that would be the generation of `galleria.js`),
 so we are providing not one, not two, but **three** scripts (bash, PowerShell and python)
 that can help you do just that on Windows, Linux, MacOS or any other Operating System.
 
@@ -69,8 +69,17 @@ Each script is designed to output the gallery data on the commandline, while aut
 handling prefixing, number padding, missing or added images, default/additional extensions
 and so on.
 
-What this means is that, as long as your images don't use a crazy ordering scheme, you
-shouldn't have to do any work at all adding a whole set of galleries to Galleria.
+Furthermore, the scripts are also designed to process an optional JSON data file, if one
+exists in an individual folder, to further customize the `galleria.js` data for that folder.
+
+For instance, if you have something like `"title": "An alternate title for your gallery"` in
+a `data.json` file in a folder, then you can have the scripts use that data to set the label
+for that gallery in Galleria. Or you can add extra properties like `tags`, `artist` or
+`comments`, and then customize the HTML to reference or filter/search from these attributes.
+
+What this means is that, as long as your images don't use a crazy ordering scheme, and you
+have attributes that can be parsed, you shouldn't have to do any work at all adding a whole
+set of galleries to Galleria, where your existing metadata can be used and referenced.
 
 ### Examples
 
