@@ -3,7 +3,6 @@
 
 # Default settings
 default_ext=".jpg"
-# NB: If you modify these, you must also edit the duplicate in 'files=($(ls -v ... ))'
 extensions=(".bmp" ".gif" ".jpeg" ".jpg" ".png" ".tga" ".tif" ".svg" ".webp")
 
 # If you have JSON data in your image folder, you can insert some of its values into
@@ -58,8 +57,15 @@ for dir in "${dirs[@]}"; do
   dir=${dir::-1}
   cd "$dir"
 
-  # Bash doesn't allow the use of variables inside wildcard, so we have to repeat the extensions
-  files=($(ls -v *.{bmp,gif,jpeg,jpg,png,tga,tif,svg,webp} 2> /dev/null))
+  # Using a variable in an ls wildcard is a bit tricky...
+  suffixes=""
+  sep=""
+  for ext in "${extensions[@]}"; do
+    suffixes+="$sep"
+    suffixes+="${ext:1}"
+    sep=","
+  done
+  eval "files=(\$(ls -v *.{${suffixes}} 2>/dev/null))"
 
   # Ignore folders with no images
   if [[ ${#files[@]} == 0 ]]; then
