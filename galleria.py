@@ -87,25 +87,31 @@ for directory in sorted(directories, key=natural_order):
         skipped_files = []
         extra_files = {}
         seq = int(remainder) + 1
-
+        prev_seqname = ""
         for i, file in enumerate(files[1:], start=1):
             basename = file.stem
             if re.search(r'\d+$', basename) is None:
                 extra_files[i] = file.name
                 continue
 
-            seq_name = f"{prefix}{seq:0{padding}}"
+            seqname = f"{prefix}{seq:0{padding}}"
             num_skipped = 0
 
-            while seq_name != basename:
-                skipped_files.append(f"{seq_name}{gallery_default_ext}")
+            # We might have something like '5.jpg' and '5.png' in the same directory
+            if prev_seqname and seqname != basename and prev_seqname == basename:
+                extra_files[i] = file.name
+                continue;
+
+            while seqname != basename:
+                skipped_files.append(f"{seqname}{gallery_default_ext}")
                 seq += 1
-                seq_name = f"{prefix}{seq:0{padding}}"
+                seqname = f"{prefix}{seq:0{padding}}"
                 num_skipped += 1
                 if num_skipped > 10:
                     print("    // FAILED TO PROCESS GALLERY")
                     break
 
+            prev_seqname = seqname
             seq += 1
 
         # Output gallery-specific settings

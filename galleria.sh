@@ -116,6 +116,7 @@ for dir in "${dirs[@]}"; do
     declare -A extra_files
     skipped_files=()
     seq=$((10#$rem + 1))
+    prev_seqname=""
     for ((i = 1 ; i < ${#files[@]} ; i++ )); do
       basename=${files[$i]}
       basename="${basename%.*}"
@@ -126,6 +127,11 @@ for dir in "${dirs[@]}"; do
       fi
       printf -v seqname "${prefix}%0${padding}g" $seq
       num_skipped=0
+      # We might have something like '5.jpg' and '5.png' in the same directory
+      if [[ x"$prev_seqname" != x"" && "$seqname" != "$basename" && "$prev_seqname" == "$basename" ]]; then
+        extra_files[$i]="${files[$i]}"
+        continue;
+      fi
       while [[ "$seqname" != "$basename" ]]; do
         skipped_files+=("${seqname}${gallery_default_ext}")
         seq=$((seq + 1))
@@ -136,6 +142,7 @@ for dir in "${dirs[@]}"; do
           break;
         fi
       done
+      prev_seqname=$seqname
       seq=$((seq + 1))
     done
 

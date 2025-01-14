@@ -79,6 +79,7 @@ foreach ($dir in $directories) {
     $seq = [int]$remainder + 1
     $skipped_files = @()
     $extra_files = @{}
+    $prev_seqname = ""
     for ($i = 1; $i -lt $files.Count; $i++) {
       $basename = $files[$i].BaseName
       if (-not ($basename -match "\d$")) {
@@ -87,6 +88,10 @@ foreach ($dir in $directories) {
       }
       $seqname = "{0}{1:D$padding}" -f $prefix, $seq
       $num_skipped = 0
+      if ($prev_seqname -and $seqname -ne $basename -and $prev_seqname -eq $basename) {
+        $extra_files[$i] = $files[$i].Name
+        continue
+      }
       while ($seqname -ne $basename) {
         $skipped_files += "$seqname$gallery_default_ext"
         $seq++
@@ -98,6 +103,7 @@ foreach ($dir in $directories) {
           break
         }
       }
+      $prev_seqname = $seqname
       $seq++
     }
 
