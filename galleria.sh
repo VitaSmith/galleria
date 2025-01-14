@@ -1,23 +1,19 @@
 #!/bin/env bash
 # Generate data for galleria from a set of image folders in the current directory
 
-# Default settings
-default_ext=".jpg"
-extensions=(".bmp" ".gif" ".jpeg" ".jpg" ".png" ".tga" ".tif" ".svg" ".webp")
-
-# If you have JSON data in your image folder, you can insert some of its values into
-# your 'galleria.js'. For instance, if you have 'title' defined as a JSON value, the
-# following will insert it as 'altName' so that Galleria sets it as the gallery name.
-# Alternatively, you can also insert the JSON data as is, such as 'artist' or 'tags'.
-# Note that this require the 'jq' command to be available on your platform.
-data_json="data.json"
-declare -A json_convert=(
-  ["title"]="altName"
-  ["artist"]="artist"
-  ["type"]="type"
-  ["tags"]="tags"
-  ["comments"]="comments"
-)
+# Read our settings from the global config file
+config_file="galleria.cfg"
+default_ext=($(grep "defaultExtension" "$config_file" | sed -E 's/.*\"(\..+)\".*/\1/'))
+extensions=($(grep "knownExtensions" "$config_file" | sed -E 's/.*\[([^]]+)\].*/\1/' | tr -d '" ' | tr ',' '\n'))
+json_file=($(grep "jsonFile" "$config_file" |  sed -E 's/.*\:.*\"(.+)\".*/\1/'))
+declare -A json_convert
+while IFS=',' read -ra pairs; do
+  for pair in "${pairs[@]}"; do
+    key=$(echo "$pair" | sed -E 's/.*"([^"]+)":.*/\1/')
+    value=$(echo "$pair" | sed -E 's/.*: ?"([^"]+)".*/\1/')
+    json_convert["$key"]="$value"
+  done
+done < <(grep "jsonConvert" "$config_file" | sed -E 's/.*\{(.*)\}.*/\1/' | tr -d ' ')
 
 # Ensure that spaces in folder names are handled properly
 IFS='
@@ -51,9 +47,9 @@ for dir in "${dirs[@]}"; do
   # Check if we have JSON data and read values from it if so
   unset json_insert
   declare -A json_insert
-  if [[ -f "$data_json" && -x "$(command -v jq)" ]]; then
+  if [[ -f "$json_file" && -x "$(command -v jq)" ]]; then
     for k in "${!json_convert[@]}"; do
-      v=$(jq -cr ".$k" "$data_json")
+      v=$(jq -cr ".$k" "$json_file")
       if [[ "$v" != "null" ]]; then
         json_insert["${json_convert[$k]}"]="$v"
       fi

@@ -16,28 +16,31 @@ Galleria is a no-dependencies HTML5 gallery viewer that can be used with any mod
 to browse a set of local galleries, such as photo albums, comics/mangas, etc.
 
 It is designed for the express purpose of being lightweight, self-contained, and easily
-configurable, through the editing of a simple local `galleria.js` file.
+configurable, through the editing of a local set of `galleria.js` and `galleria.cfg` files
+containing the gallery data and the global configuration respectively.
 
 Considering that every modern browser already has everything required, natively, to provide
 great gallery visualization, our design aims at giving you what actually matters (the actual
-image data, in all its glory) without the unnecessary, and oft unwanted, distractions.
+image data, in all its glory) without the unnecessary, and often unwanted, distractions.
 
 ## Features
 
 - Works with any recent browser (Firefox, Edge, Chrome, Safari, Opera).
+- **No** requirement for a webserver, even a local one. Just use your browser and go!
 - **No** external dependencies (no downloading/querying of external javascript and whatnot).
   Galleria simply works, with all of its features, even if your internet is disconnected.
 - Lightweight.
-- Customizable.
+- Highly customizable.
+- Can process existing JSON metadata.
+- With ready-to-use scripts (bash, PowerShell, Python) for automated gallery generation.
 
 ## Usage
 
 Download the `galleria.*` files from this repository and copy them to the folder where
 you have a set of subfolders containing image sets of photos, comics/mangas, etc.
 
-Then either edit `galleria.js` manually according to the layout of your image sets (or, if
-you have bash shell available, run `./galleria.sh` to automatically generate a `galleria.js`
-for you.
+Then either edit `galleria.js` and `galleria.cfg` manually, according to the layout of your
+image sets. Or, use one of the Bash/PowerShell/Python scripts provided, to do that for you.
 
 Once that is done, open `galleria.html` in your browser to navigate/view the galleries.
 
@@ -73,9 +76,10 @@ Furthermore, the scripts are also designed to process an optional JSON data file
 exists in an individual folder, to further customize the `galleria.js` data for that folder.
 
 For instance, if you have something like `"title": "An alternate title for your gallery"` in
-a `data.json` file in a folder, then you can have the scripts use that data to set the label
-for that gallery in Galleria. Or you can add extra properties like `tags`, `artist` or
-`comments`, and then customize the HTML to reference or filter/search from these attributes.
+a `data.json` file in a folder, and also defined the relevant options in `galleria.cfg`, you
+can have the scripts use that data to set the label for that gallery in Galleria. Or you can
+add extra properties like `tags`, `artist` or `comments`, and then customize the HTML to
+reference or filter/search from these attributes.
 
 What this means is that, as long as your images don't use a crazy ordering scheme, and you
 have attributes that can be parsed, you shouldn't have to do any work at all adding a whole
@@ -150,8 +154,9 @@ The following assumes that you have `defaultExtension: ".jpg"` in `galleria.js`.
   },
 ```
 
-For more details, see the default `galleria.js` from this repository, along with the sample
-galleries provided. And as you will see, outside of elements that are impossible to guess
-(such as where extra images should be inserted, or what order should a list of unnumbered
-images be, if not alpahetical), the `galleria.sh` script is smart enough to automatically
+For more details, see the default `galleria.js` and `galleria.cfg` from this repository,
+along with the sample galleries provided. You can also try to run any of the scripts against
+the default galleries, where you will see that, outside of elements that are impossible to
+guess (such as where extra images should be inserted, or what order should a list of
+unnumbered images be, if not alpahetical), the scripts are smart enough to automatically
 generate the gallery layouts above, just by looking at the content of the folders.

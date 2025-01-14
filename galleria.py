@@ -5,22 +5,29 @@ import json
 from pathlib import Path
 from collections import defaultdict
 
-# Default settings
-default_ext = ".jpg"
-extensions = [".bmp", ".gif", ".jpeg", ".jpg", ".png", ".tga", ".tif", ".svg", ".webp"]
-
-# If you have JSON data in your image folder, you can insert some of its values into
-# your 'galleria.js'. For instance, if you have 'title' defined as a JSON value, the
-# following will insert it as 'altName' so that Galleria sets it as the gallery name.
-# Alternatively, you can also insert the JSON data as is, such as 'artist' or 'tags'.
-data_json = "data.json"
-json_convert = {
-  "title": "altName",
-  "artist": "artist",
-  "type": "type",
-  "tags": "tags",
-  "comments": "comments",
-}
+# Read our settings from the global config file
+config_file = "galleria.cfg"
+json_convert = {}
+with open(config_file, "r") as file:
+    for line in file:
+        if "defaultExtension" in line:
+            match = re.search(r'defaultExtension:\s*\"(.+)\"', line)
+            default_ext = match.group(1)
+        if "knownExtensions" in line:
+            match = re.search(r'knownExtensions:\s*\[(.+)\]', line)
+            content = match.group(1)
+            extensions = re.findall(r'"([^"]+)"|\'([^\']+)\'', content)
+            extensions = [ext[0] or ext[1] for ext in extensions]
+        if "jsonFile" in line:
+            match = re.search(r'jsonFile:\s*\"(.+)\"', line)
+            json_file = match.group(1)
+        if "jsonConvert" in line:
+            match = re.search(r'jsonConvert:\s*\{(.+)\}', line)
+            if match:
+                content = match.group(1)
+                pairs = re.findall(r'"([^"]+)":\s*"([^"]+)"', content)
+                for key, value in pairs:
+                    json_convert[key] = value
 
 print("const galleries = {")
 
@@ -42,7 +49,7 @@ for directory in sorted(directories, key=natural_order):
 
     # Check if we have JSON data and read values from it if so
     json_insert = {}
-    data_file = os.path.join(directory, data_json)
+    data_file = os.path.join(directory, json_file)
     if (os.path.isfile(data_file)):
         with open(data_file) as f:
             jdata = json.load(f)

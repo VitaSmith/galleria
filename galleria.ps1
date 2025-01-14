@@ -1,20 +1,26 @@
 # Generate data for Galleria from a set of image folders in the current directory
 
-# Default settings
-$default_ext = ".jpg"
-$extensions = @(".bmp", ".gif", ".jpeg", ".jpg", ".png", ".tga", ".tif", ".svg", ".webp")
-
-# If you have JSON data in your image folder, you can insert some of its values into
-# your 'galleria.js'. For instance, if you have 'title' defined as a JSON value, the
-# following will insert it as 'altName' so that Galleria sets it as the gallery name.
-# Alternatively, you can also insert the JSON data as is, such as 'artist' or 'tags'.
-$data_json = "data.json"
-$json_convert = @{
-  "title" = "altName"
-  "artist" = "artist"
-  "type" = "type"
-  "tags" = "tags"
-  "comments" = "comments"
+# Read our settings from the global config file
+$config_file = "galleria.cfg"
+Get-Content $config_file | ForEach-Object {
+  if ($_ -match 'defaultExtension:\s*\"(.+)\"') {
+    $default_ext = $Matches[1]
+  } elseif ($_ -match 'knownExtensions:\s*\[(.+)\]') {
+    $content = $Matches[1]
+    $extensions = ($content -split ',') -replace '["\s]', ''
+  } elseif ($_ -match 'jsonFile:\s*\"(.+)\"') {
+    $json_file = $Matches[1]
+  } elseif ($_ -match 'jsonConvert:\s*\{(.+)\}') {
+    $content = $Matches[1]
+    $json_convert = @{}
+    $content -split ',' | ForEach-Object {
+      if ($_ -match '"([^"]+)":\s*"([^"]+)"') {
+        $key = $Matches[1]
+        $value = $Matches[2]
+        $json_convert[$key] = $value
+      }
+    }
+  }
 }
 
 # Get directories in the current folder
@@ -33,8 +39,8 @@ foreach ($dir in $directories) {
 
   # Check if we have JSON data and read values from it if so
   $json_insert = @{}
-  if (Get-ChildItem -Path $dir $data_json) {
-    $json = Get-Content -Path (Join-Path $dir $data_json) -Raw | ConvertFrom-Json
+  if (Get-ChildItem -Path $dir $json_file) {
+    $json = Get-Content -Path (Join-Path $dir $json_file) -Raw | ConvertFrom-Json
     foreach ($k in $json_convert.keys) {
       if ($json."$k") {
         $json_insert[$json_convert[$k]] = $json."$k"
@@ -100,7 +106,7 @@ foreach ($dir in $directories) {
     }
 
     # Output gallery-specific settings
-    if ($gallery_default_ext -ne $defaultExt) {
+    if ($gallery_default_ext -ne $default_ext) {
       Write-Output "    defaultExtension: `"$gallery_default_ext`","
     }
     if ($prefix) {
