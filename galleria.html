@@ -204,6 +204,14 @@ SOFTWARE.
         for (let i = 0; i < galleryNames.length; i++) {
           const galleryData = galleries[galleryNames[i]];
 
+          // Set the page title
+          document.title = "Galleria";
+          if (galleriesPerPage < Object.keys(galleries).length) {
+            document.title += " - [" + (currentPage * galleriesPerPage + 1 ) + "..";
+            document.title += Math.min((currentPage + 1) * galleriesPerPage, Object.keys(galleries).length);
+            document.title += "]/" + Object.keys(galleries).length;
+          }
+
           // Eliminate empty galleries
           if (galleryData.imageList !== undefined) {
             if (galleryData.imageList.length == 0)
@@ -261,6 +269,7 @@ SOFTWARE.
           nextBtn.style.display = "none";
           // Gallery mode, where we display all the pages from a gallery as thumbnails
           const galleryData = galleries[currentGallery];
+          document.title = galleryData.altName ?? currentGallery;
 
           for (let i = 0; i < imageList.length; i++) {
             const thumbnailListItem = document.createElement("div");
@@ -293,6 +302,7 @@ SOFTWARE.
         const numImages = imageList.length;
         const imageName = imageList[currentImageIndex];
         imageView.src = currentGallery + "/" + imageName;
+        document.title = currentGallery + "/" + imageName + " [" + (currentImageIndex + 1) + "/" + numImages + "]";
         imageView.alt = "'" + imageName  + "' not found";
         imageView.style.zIndex = "1";
         prevBtn.innerHTML = (currentImageIndex === 0) ? "&#x2759;" : "&#x276e;";
