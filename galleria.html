@@ -98,8 +98,8 @@ SOFTWARE.
 </head>
 <body>
   <div class="pagination" id="pagination">
-    <span id="prevBtn" onclick="switchPage(-1)" class="nav-arrow nav-left">&#10094;</span>
-    <span id="nextBtn" onclick="switchPage(1)" class="nav-arrow nav-right">&#10095;</span>
+    <span id="prevBtn" onclick="switchPageOrImage(-1)" class="nav-arrow nav-left">&#x276e;</span>
+    <span id="nextBtn" onclick="switchPageOrImage(1)" class="nav-arrow nav-right">&#x276f;</span>
   </div>
   <div class="thumbnail-list" id="thumbnailList"></div>
   <div class="image-viewer" id="imageViewer">
@@ -120,7 +120,7 @@ SOFTWARE.
     let currentGalleryIndex = 0;
     let currentImageIndex = 0;
     let fitToPage = settings.fitToPage;
-    let singleImageMode = true;
+    let singleImageMode = false;
     let imageList = [];
     let skipped = 0;
     let currentPage = 0;
@@ -135,10 +135,11 @@ SOFTWARE.
     document.body.style.background = settings.defaultBackgroundColor;
     document.body.style.fontFamily = settings.defaultFont;
     document.body.style.fontStyle = settings.defaultFontStyle;
+    document.getElementById("pagination").style.color = settings.defaultArrowColor;
 
     function hideThumbnails() {
-      prevBtn.style.display = "none";
-      nextBtn.style.display = "none";
+      prevBtn.style.display = "block";
+      nextBtn.style.display = "block";
       thumbnailList.style.display = "none";
       imageViewer.style.display = "block";
     }
@@ -183,6 +184,8 @@ SOFTWARE.
     // Create gallery thumbnails and labels
     function createThumbnails(index) {
       thumbnailList.innerHTML = "";
+      prevBtn.innerHTML = "&#x276e;";
+      nextBtn.innerHTML = "&#x276f;";
 
       // Scroll back to the current image in the thumbnail list
       const observer = new MutationObserver((mutations, obs) => {
@@ -240,6 +243,7 @@ SOFTWARE.
               currentGallery = galleryNames[i];
               currentGalleryIndex = i;
               currentImageIndex = 0;
+              singleImageMode = true;
               hideThumbnails();
               updateImage();
             }
@@ -274,9 +278,9 @@ SOFTWARE.
             // Open the selected image on click
             thumbnailListItem.addEventListener("click", () => {
               currentImageIndex = i;
+              singleImageMode = true;
               hideThumbnails();
               updateImage();
-              singleImageMode = true;
             });
           }
       }
@@ -290,7 +294,9 @@ SOFTWARE.
         const imageName = imageList[currentImageIndex];
         imageView.src = currentGallery + "/" + imageName;
         imageView.alt = "'" + imageName  + "' not found";
-
+        imageView.style.zIndex = "1";
+        prevBtn.innerHTML = (currentImageIndex === 0) ? "&#x2759;" : "&#x276e;";
+        nextBtn.innerHTML = (currentImageIndex === imageList.length - 1) ? "&#x2759;" : "&#x276f;";
         if (fitToPage) {
           imageView.style.maxHeight = "100%";
           imageView.style.maxWidth = "100%";
@@ -305,24 +311,22 @@ SOFTWARE.
       }
     }
 
-    // Display the next/previous image
-    function switchImage(increment) {
-      currentImageIndex += increment;
-      if (currentImageIndex < 0 || currentImageIndex >= imageList.length) {
-        // Go back to the gallery list if we are past first or last image
-        currentGallery = null;
-        thumbnailList.style.display = "flex";
-        imageViewer.style.display = "none";
-        imageView.src = "";
-        createThumbnails(currentGalleryIndex);
-      } else {
-        updateImage();
-      }
-    }
-
-    // Display the next/previous page
-    function switchPage(increment) {
-      if (currentPage + increment >= 0 && currentPage + increment < totalPages) {
+    // Display the next/previous page or image
+    function switchPageOrImage(increment) {
+      if (singleImageMode) {
+        currentImageIndex += increment;
+        if (currentImageIndex < 0 || currentImageIndex >= imageList.length) {
+          // Go back to the gallery list if we are past first or last image
+          currentGallery = null;
+          singleImageMode = false;
+          thumbnailList.style.display = "flex";
+          imageViewer.style.display = "none";
+          imageView.src = "";
+          createThumbnails(currentGalleryIndex);
+        } else {
+          updateImage();
+        }
+      } else if (currentPage + increment >= 0 && currentPage + increment < totalPages) {
         currentPage += increment;
         galleryNames = Object.keys(galleries).slice(
           currentPage * galleriesPerPage,
@@ -339,13 +343,17 @@ SOFTWARE.
         const imageWidth = imageView.clientWidth;
         // Check if the click is on the left or right side of the image
         const increment = (event.clientX - imageView.getBoundingClientRect().left > imageWidth / 2) ? 1 : -1;
-        switchImage(increment);
+        switchPageOrImage(increment);
       }
     });
 
     // Handle keyboard events
     document.addEventListener("keydown", (event) => {
-      if (currentGallery) {
+      if (event.key === "ArrowRight" || event.key === "PageDown") {
+        switchPageOrImage(1);
+      } else if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        switchPageOrImage(-1);
+      } else if (currentGallery) {
         if (singleImageMode && (event.key === "f" || event.key === "F")) {
           fitToPage = !fitToPage;
           updateImage();
@@ -355,23 +363,13 @@ SOFTWARE.
           imageViewer.style.display = "none";
           imageView.src = "";
           createThumbnails(currentImageIndex);
-        } else if (singleImageMode && (event.key === "ArrowRight" || event.key === "PageDown")) {
-          switchImage(1);
-        } else if (singleImageMode && (event.key === "ArrowLeft" || event.key === "PageUp")) {
-          switchImage(-1);
         } else if (event.key === "Escape") {
           currentGallery = null;
-          singleImageMode = true;
+          singleImageMode = false;
           thumbnailList.style.display = "flex";
           imageViewer.style.display = "none";
           imageView.src = "";
           createThumbnails(currentGalleryIndex);
-        }
-      } else {
-        if (event.key === "ArrowRight" || event.key === "PageDown") {
-          switchPage(1);
-        } else if (event.key === "ArrowLeft" || event.key === "PageUp") {
-          switchPage(-1);
         }
       }
     });
