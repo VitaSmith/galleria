@@ -67,7 +67,7 @@ for dir in "${dirs[@]}"; do
 
   # Add the gallery header
   echo "  \"${dir}\": {"
-  echo "    numImages: ${#files[@]},"
+  echo "    images: ${#files[@]},"
 
   # Output the processed JSON data
   for k in "${!json_insert[@]}"; do

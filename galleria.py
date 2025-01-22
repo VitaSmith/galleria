@@ -63,7 +63,7 @@ for directory in sorted(directories, key=natural_order):
     remainder = first_file[len(prefix):]
 
     print(f'  "{directory.name}": {{')
-    print(f'    numImages: {len(files)},')
+    print(f'    images: {len(files)},')
 
     # Output the processed JSON data
     for key in json_insert:

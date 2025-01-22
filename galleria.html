@@ -91,6 +91,19 @@ SOFTWARE.
     .nav-right {
       right: 10px;
     }
+    .thumbnail-info {
+      display: none;
+      position: absolute;
+      width: fit-content;
+    }
+    .thumbnail-info-item {
+      display: flex;
+      width: fit-content;
+      margin: auto;
+      background-clip: padding-box;
+      border-top: 2px solid transparent;
+      padding: 0pt 3pt 1pt 3pt;
+    }
   </style>
   <!-- Load the external settings and gallery data -->
   <script type="text/javascript" src="galleria.cfg"></script>
@@ -121,6 +134,7 @@ SOFTWARE.
     let currentImageIndex = 0;
     let fitToPage = settings.fitToPage;
     let singleImageMode = false;
+    let displayInfo = false;
     let imageList = [];
     let skipped = 0;
     let currentPage = 0;
@@ -133,8 +147,7 @@ SOFTWARE.
     // Set the style
     document.body.style.color = settings.defaultTextColor;
     document.body.style.background = settings.defaultBackgroundColor;
-    document.body.style.fontFamily = settings.defaultFont;
-    document.body.style.fontStyle = settings.defaultFontStyle;
+    document.body.style.font = settings.defaultFont;
     document.getElementById("pagination").style.color = settings.defaultArrowColor;
 
     function hideThumbnails() {
@@ -216,7 +229,7 @@ SOFTWARE.
           if (galleryData.imageList !== undefined) {
             if (galleryData.imageList.length == 0)
               return;
-          } else if (galleryData.numImages == undefined || galleryData.numImages === 0) {
+          } else if (galleryData.images == undefined || galleryData.images === 0) {
             return;
           }
 
@@ -225,10 +238,40 @@ SOFTWARE.
           thumbnailListItem.setAttribute("id", i);
           thumbnailList.appendChild(thumbnailListItem);
 
+          // Populate the gallery info overlay (toggled with <I>)
+          if (settings.infoDisplay !== undefined) {
+            const thumbnailText = document.createElement("div");
+            thumbnailText.className = "thumbnail-info";
+            thumbnailText.style.display = displayInfo ? "inline-block" : "none";
+            thumbnailText.style.font = settings.defaultInfoFont;
+            thumbnailText.style.color = settings.defaultInfoTextColor;
+            for (const info of settings.infoDisplay) {
+              if (info in galleryData || info == "images") {
+                thumbnailTextSpan = document.createElement("span");
+                thumbnailTextSpan.className = "thumbnail-info-item";
+                thumbnailTextSpan.style.backgroundColor = "rgba(0, 0, 0," + settings.defaultInfoOpacity + ")";
+                thumbnailTextSpan.innerHTML = info + ": ";
+                if (info == "images" && galleryData.imageList !== undefined) {
+                  thumbnailTextSpan.innerHTML += galleryData.imageList.length;
+                } else if (Array.isArray(galleryData[info])) {
+                  let firstItem = true;
+                  for (const data of galleryData[info]) {
+                    thumbnailTextSpan.innerHTML += (firstItem ? "" : ", ") + data;
+                    firstItem = false;
+                  }
+                } else {
+                  thumbnailTextSpan.innerHTML += galleryData[info];
+                }
+                thumbnailText.appendChild(thumbnailTextSpan);
+              }
+            }
+            thumbnailListItem.appendChild(thumbnailText);
+          }
+
           const thumbnailImg = document.createElement("img");
           const imageName = getImageName(0, galleryData);
           const numImages = (galleryData.imageList !== undefined) ?
-            galleryData.imageList.length : galleryData.numImages;
+            galleryData.imageList.length : galleryData.images;
           thumbnailImg.src = galleryNames[i] + "/" + imageName;
           thumbnailImg.alt = "'" + imageName + "' not found";
           thumbnailImg.title = numImages + " image" + ((numImages === 1) ? "" : "s");
@@ -244,7 +287,7 @@ SOFTWARE.
               imageList = galleryData.imageList;
             } else {
               const defaultExtension = galleryData.defaultExtension ?? settings.defaultExtension;
-              for (let i = 0; i < galleryData.numImages; i++)
+              for (let i = 0; i < numImages; i++)
                 imageList.push(getImageName(i, galleryData));
             }
             if (imageList.length !== 0) {
@@ -380,6 +423,11 @@ SOFTWARE.
           imageViewer.style.display = "none";
           imageView.src = "";
           createThumbnails(currentGalleryIndex);
+        }
+      } else if (event.key === "i" || event.key === "I") {
+        displayInfo = !displayInfo;
+        for (let element of document.getElementsByClassName("thumbnail-info")) {
+          element.style.display = displayInfo ? "inline-block" : "none";
         }
       }
     });

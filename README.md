@@ -94,7 +94,7 @@ The following assumes that you have `defaultExtension: ".jpg"` in `galleria.js`.
 
 ```js
   "Gallery A": {
-    numImages: 10,
+    images: 10,
   },
 ```
 
@@ -103,7 +103,7 @@ The following assumes that you have `defaultExtension: ".jpg"` in `galleria.js`.
 
 ```js
   "Gallery B": {
-    numImages: 6,
+    images: 6,
     firstImage: "0.jpg",
     altName: "Some alternate gallery name",
   },
@@ -114,7 +114,7 @@ The following assumes that you have `defaultExtension: ".jpg"` in `galleria.js`.
 
 ```js
   "Gallery C": {
-    numImages: 10,
+    images: 10,
     imagePrefix: "DSFC",
     numberPadding: "0001",
     firstImage: "DSFC0123.jpg",
@@ -137,7 +137,7 @@ The following assumes that you have `defaultExtension: ".jpg"` in `galleria.js`.
 
 ```js
   "Gallery E": {
-    numImages: 7,
+    images: 7,
     insertImage: { 0: "first.jpg", 3: "extra.jpg", 6: "last.jpg" },
   },
 ```
@@ -147,7 +147,7 @@ The following assumes that you have `defaultExtension: ".jpg"` in `galleria.js`.
 
 ```js
   "Gallery F": {
-    numImages: 5,
+    images: 5,
     numberPadding: "001",
     defaultExtension: ".png",
     customExtension: [ "001.webp", "004.gif" ],

@@ -55,7 +55,7 @@ foreach ($dir in $directories) {
 
   # Add the gallery header
   Write-Output "  `"$($dir.Name)`": {"
-  Write-Output "    numImages: $($files.Count),"
+  Write-Output "    images: $($files.Count),"
 
   # Output the processed JSON data
   foreach ($k in $json_insert.keys) {
