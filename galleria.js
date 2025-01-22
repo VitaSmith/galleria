@@ -1,5 +1,6 @@
 /* Galleria - Data file */
 
+const galleryTitle = "Galleria - Main Gallery";
 const galleries = {
   "Gallery A": {
     // Sequential gallery of 10 images starting at '1.svg' and ending at '10.svg'.
@@ -48,4 +49,10 @@ const galleries = {
   },
   // Uncomment this after running 'gen_gallery.sh', to test a very large set of images.
   // "Gallery G": { images: 2000 },
+  // The following adds a subgallery to the main gallery
+  "SubGallery": {
+    images: 16,
+    type: "subgallery",
+    imageList: [ "subgallery.svg" ],
+  }
 };
