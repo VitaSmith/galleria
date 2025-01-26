@@ -223,33 +223,37 @@ SOFTWARE.
       if (!currentGallery) {
         prevBtn.style.display = (currentPage <= 0 || totalPages == 1) ? "none" : "block";
         nextBtn.style.display = (currentPage >= totalPages - 1 || totalPages == 1) ? "none" : "block";
+
+        // Set the page title
+        document.title = (typeof galleryTitle === 'undefined') ? "Galleria" : galleryTitle;
+        if (galleriesPerPage < Object.keys(galleries).length) {
+          document.title += " - [" + (currentPage * galleriesPerPage + 1 ) + "..";
+          document.title += Math.min((currentPage + 1) * galleriesPerPage, Object.keys(galleries).length);
+          document.title += "]/" + Object.keys(galleries).length;
+        }
+
         // Global mode, where we display the first image of each gallery
         for (let i = 0; i < galleryNames.length; i++) {
           const galleryData = galleries[galleryNames[i]];
 
-          // Set the page title
-          document.title = (typeof galleryTitle === 'undefined') ? "Galleria" : galleryTitle;
-          if (galleriesPerPage < Object.keys(galleries).length) {
-            document.title += " - [" + (currentPage * galleriesPerPage + 1 ) + "..";
-            document.title += Math.min((currentPage + 1) * galleriesPerPage, Object.keys(galleries).length);
-            document.title += "]/" + Object.keys(galleries).length;
-          }
-
-          // Eliminate empty galleries
+          // Append gallery, while removing empty ones and detecting sub-galleries
+          let appendTo = thumbnailList;
           if (galleryData.imageList !== undefined) {
-            if (galleryData.imageList.length == 0)
+            if (galleryData.imageList.length == 0) {
               return;
+            } else if (
+                galleryData.imageList.length == 1 &&
+                galleryData.imageList[0].match("^galleria\..+$")
+              ) {
+              // An imageList with a single 'galleria.xyz' image indicates a sub-gallery
+              a = document.createElement("a");
+              a.classList.add("nostyle");
+              a.href = galleryNames[i] + "/galleria.html";
+              thumbnailList.appendChild(a);
+              appendTo = a;
+            }
           } else if (galleryData.images == undefined || galleryData.images === 0) {
             return;
-          }
-
-          let appendTo = thumbnailList;
-          if (galleryData.type == "subgallery") {
-            a = document.createElement("a");
-            a.classList.add("nostyle");
-            a.href = galleryNames[i] + "/galleria.html";
-            thumbnailList.appendChild(a);
-            appendTo = a;
           }
           const thumbnailListItem = document.createElement("div");
           thumbnailListItem.classList.add("thumbnail-list-item");

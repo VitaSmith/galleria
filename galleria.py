@@ -2,6 +2,7 @@
 import os
 import re
 import json
+import shutil
 from pathlib import Path
 from collections import defaultdict
 
@@ -38,10 +39,25 @@ directories = [d for d in Path(".").iterdir() if d.is_dir()]
 natural_order = lambda s: [int(t) if t.isdigit() else t.lower() for t in re.split(r'(\d+)', s.name)]
 
 for directory in sorted(directories, key=natural_order):
-    files = sorted(
-        [f for f in directory.iterdir() if f.suffix in extensions],
-        key=natural_order
+    # Check if we have a 'galleria.html+.js' in which case we create a sub-gallery
+    sub_gallery = (
+        os.path.isfile(os.path.join(directory, "galleria.html")) and
+        os.path.isfile(os.path.join(directory, "galleria.js"))
     )
+
+    if sub_gallery:
+        files = []
+        subdirs = [d for d in Path(directory).iterdir() if d.is_dir()]
+        for subdir in sorted(subdirs, key=natural_order):
+            files += sorted(
+                [f for f in subdir.iterdir() if f.suffix in extensions],
+                key=natural_order
+            )
+    else:
+        files = sorted(
+            [f for f in directory.iterdir() if f.suffix in extensions],
+            key=natural_order
+        )
 
     # Skip directories without images
     if not files:
@@ -59,6 +75,7 @@ for directory in sorted(directories, key=natural_order):
 
     # Guess pattern from the first file
     first_file = files[0].stem
+    extension = files[0].suffix
     prefix = ''.join([c for c in first_file if not c.isdigit()])
     remainder = first_file[len(prefix):]
 
@@ -68,6 +85,15 @@ for directory in sorted(directories, key=natural_order):
     # Output the processed JSON data
     for key in json_insert:
         print(f'    {key}: {json.dumps(json_insert[key])},')
+
+    # Create the sub-gallery data if needed
+    if sub_gallery:
+        gallery_cover = os.path.join(directory, "galleria" + extension)
+        if not os.path.isfile(gallery_cover):
+            shutil.copyfile(files[0], gallery_cover)
+        print(f'    imageList = [ "galleria{extension}" ],')
+        print('  },')
+        continue
 
     if not remainder or not first_file.startswith(prefix + remainder):
         # Output all files as a list
@@ -142,6 +168,6 @@ for directory in sorted(directories, key=natural_order):
             )
             print(f'    customExtension: [ {custom_ext_files} ],')
 
-    print("  },")
+    print('  },')
 
-print("}")
+print('}')

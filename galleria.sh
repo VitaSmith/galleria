@@ -25,8 +25,14 @@ dirs=($(ls -vd */))
 for dir in "${dirs[@]}"; do
 
   skip_gallery=0
+  sub_gallery=0
   dir=${dir::-1}
   cd "$dir"
+
+  # Check if we have a 'galleria.html+.js' in which case we create a sub-gallery
+  if [[ -f "galleria.html" && -f "galleria.js" ]]; then
+    sub_gallery=1
+  fi
 
   # Using a variable in an ls wildcard is a bit tricky...
   suffixes=""
@@ -36,7 +42,11 @@ for dir in "${dirs[@]}"; do
     suffixes+="${ext:1}"
     sep=","
   done
-  eval "files=(\$(ls -v *.{${suffixes}} 2>/dev/null))"
+  if (( $sub_gallery != 0 )); then
+    eval "files=(\$(ls -v */*.{${suffixes}} 2>/dev/null))"
+  else
+    eval "files=(\$(ls -v *.{${suffixes}} 2>/dev/null))"
+  fi
 
   # Ignore folders with no images
   if [[ ${#files[@]} == 0 ]]; then
@@ -58,6 +68,8 @@ for dir in "${dirs[@]}"; do
 
   # Try to guess the pattern from the first file listed
   first_file=${files[0]}
+  # Get the extension
+  extension="${first_file##*.}"
   # Remove extension
   first_file="${first_file%.*}"
   # Check for a prefix
@@ -79,6 +91,18 @@ for dir in "${dirs[@]}"; do
       echo "    $k: ${json_insert[$k]},"
     fi
   done
+
+  # Create the sub-gallery data if needed
+  if (( $sub_gallery != 0 )); then
+    gallery_cover="galleria.${extension}"
+    if [[ ! -f "${gallery_cover}" ]]; then
+      cp "${files[0]}" "${gallery_cover}"
+    fi
+    echo "    imageList = [ \"${gallery_cover}\" ],"
+    echo "  },"
+    cd ..
+    continue
+  fi
 
   if [[ -z "$rem" || "$prefix$rem" != "$first_file" ]]; then
 

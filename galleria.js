@@ -47,12 +47,12 @@ const galleries = {
     // them in customExtension.
     customExtension: [ "001.png", "004.jpeg" ],
   },
-  // Uncomment this after running 'gen_gallery.sh', to test a very large set of images.
-  // "Gallery G": { images: 2000 },
   // The following adds a subgallery to the main gallery
   "SubGallery": {
     images: 16,
-    type: "subgallery",
-    imageList: [ "subgallery.svg" ],
+    // An imageList with a single 'galleria.xyz' image indicates a sub-gallery
+    imageList: [ "galleria.svg" ],
   }
+  // Uncomment this after running 'gen_gallery.sh', to test a very large set of images.
+  // "Gallery G": { images: 2000 },
 };

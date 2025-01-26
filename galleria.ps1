@@ -27,10 +27,17 @@ Get-Content $config_file | ForEach-Object {
 $directories = Get-ChildItem -Directory | Sort-Object Name
 
 foreach ($dir in $directories) {
+  $skip_gallery = $false
+  # Check if we have a 'galleria.html+.js' in which case we create a sub-gallery
+  $sub_gallery = (Get-ChildItem $dir -File -Filter "galleria.html") -and (Get-ChildItem $dir -File -Filter "galleria.js")
+
   # Unlike Linux, Windows doesn't have natural order sorting so we have to regexp it
   $ToNaturalOrder = { [regex]::Replace($_.Name, '\d+', { $args[0].Value.PadLeft(20) }) }
-  $files = Get-ChildItem $dir -File | Where-Object { $extensions -contains $_.Extension } | Sort-Object $ToNaturalOrder
-  $skip_gallery = $false
+  if ($sub_gallery) {
+    $files = Get-ChildItem "$dir\*\*" -File | Where-Object { $extensions -contains $_.Extension } | Sort-Object $ToNaturalOrder
+  } else {
+    $files = Get-ChildItem $dir -File | Where-Object { $extensions -contains $_.Extension } | Sort-Object $ToNaturalOrder
+  }
 
   # Skip folders without images
   if ($files.Count -eq 0) {
@@ -50,6 +57,7 @@ foreach ($dir in $directories) {
 
   # Try to guess the pattern from the first file listed
   $first_file = $files[0].BaseName
+  $extension = $files[0].Extension
   $prefix = $first_file -replace "\d", ""
   $remainder = $first_file.Substring($prefix.Length)
 
@@ -61,6 +69,17 @@ foreach ($dir in $directories) {
   foreach ($k in $json_insert.keys) {
     $v = $json_insert[$k] | ConvertTo-Json -Compress
     Write-Output "    $k`: $v,"
+  }
+
+  # Create the sub-gallery data if needed
+  if ($sub_gallery) {
+    $gallery_cover = Join-Path -Path $dir -ChildPath ("galleria" + $extension)
+    if (!(Test-Path -Path $gallery_cover)) {
+      Copy-Item $files[0] -Destination $gallery_cover
+    }
+    Write-Output "    imageList = [ `"galleria$extension`" ],"
+    Write-Output "  },"
+    continue
   }
 
   if (-not $remainder -or ($prefix + $remainder) -ne $first_file) {
