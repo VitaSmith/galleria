@@ -34,9 +34,9 @@ foreach ($dir in $directories) {
   # Unlike Linux, Windows doesn't have natural order sorting so we have to regexp it
   $ToNaturalOrder = { [regex]::Replace($_.Name, '\d+', { $args[0].Value.PadLeft(20) }) }
   if ($sub_gallery) {
-    $files = Get-ChildItem "$dir\*\*" -File | Where-Object { $extensions -contains $_.Extension } | Sort-Object $ToNaturalOrder
+    $files = Get-ChildItem "$dir\*\*" -File | Where-Object { $extensions -contains $_.Extension.ToLower() } | Sort-Object $ToNaturalOrder
   } else {
-    $files = Get-ChildItem $dir -File | Where-Object { $extensions -contains $_.Extension } | Sort-Object $ToNaturalOrder
+    $files = Get-ChildItem $dir -File | Where-Object { $extensions -contains $_.Extension.ToLower() } | Sort-Object $ToNaturalOrder
   }
 
   # Skip folders without images

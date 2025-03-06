@@ -38,7 +38,7 @@ directories = [d for d in Path(".").iterdir() if d.is_dir()]
 # Ensure that files and directories are listed in natural order
 natural_order = lambda s: [int(t) if t.isdigit() else t.lower() for t in re.split(r'(\d+)', s.name)]
 
-for directory in sorted(directories, key=natural_order):
+for directory in sorted(directories, key = natural_order):
     # Check if we have a 'galleria.html+.js' in which case we create a sub-gallery
     sub_gallery = (
         os.path.isfile(os.path.join(directory, "galleria.html")) and
@@ -48,15 +48,15 @@ for directory in sorted(directories, key=natural_order):
     if sub_gallery:
         files = []
         subdirs = [d for d in Path(directory).iterdir() if d.is_dir()]
-        for subdir in sorted(subdirs, key=natural_order):
+        for subdir in sorted(subdirs, key = natural_order):
             files += sorted(
-                [f for f in subdir.iterdir() if f.suffix in extensions],
-                key=natural_order
+                [f for f in subdir.iterdir() if f.suffix.lower() in extensions],
+                key = natural_order
             )
     else:
         files = sorted(
-            [f for f in directory.iterdir() if f.suffix in extensions],
-            key=natural_order
+            [f for f in directory.iterdir() if f.suffix.lower() in extensions],
+            key = natural_order
         )
 
     # Skip directories without images
@@ -84,7 +84,7 @@ for directory in sorted(directories, key=natural_order):
 
     # Output the processed JSON data
     for key in json_insert:
-        print(f'    {key}: {json.dumps(json_insert[key])},')
+        print(f'    {key}: {json.dumps(json_insert[key], ensure_ascii = False)},')
 
     # Create the sub-gallery data if needed
     if sub_gallery:
@@ -106,7 +106,7 @@ for directory in sorted(directories, key=natural_order):
             ext_count[file.suffix] += 1
 
         # Determine gallery's default extension
-        gallery_default_ext = max(ext_count, key=ext_count.get)
+        gallery_default_ext = max(ext_count, key = ext_count.get)
 
         # Handle numeric sequences, skipped files, and extras
         padding = len(remainder)
@@ -114,7 +114,7 @@ for directory in sorted(directories, key=natural_order):
         extra_files = {}
         seq = int(remainder) + 1
         prev_seqname = ""
-        for i, file in enumerate(files[1:], start=1):
+        for i, file in enumerate(files[1:], start = 1):
             basename = file.stem
             if re.search(r'\d+$', basename) is None:
                 extra_files[i] = file.name

@@ -18,6 +18,9 @@ done < <(grep "jsonConvert" "$config_file" | sed -E 's/.*\{(.*)\}.*/\1/' | tr -d
 # Ensure that spaces in folder names are handled properly
 IFS='
 '
+# Ensure that our filtering for extensions is case-insensitive
+shopt -s nocaseglob > /dev/null
+
 echo "const galleries = {"
 
 # Using -v ensures natural sorting of directories (i.e '11/' listed before '101/')
