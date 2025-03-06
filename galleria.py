@@ -151,7 +151,7 @@ for directory in sorted(directories, key = natural_order):
             padded_number = str(1).zfill(padding)
             print(f'    numberPadding: "{padded_number}",')
 
-        if int(remainder) != 1:
+        if int(remainder.lstrip("0")) != 1:
             print(f'    firstImage: "{files[0].name}",')
 
         if skipped_files:

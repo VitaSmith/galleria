@@ -149,7 +149,10 @@ SOFTWARE.
     let skipped = 0;
     let currentPage = 0;
     let totalPages = Math.ceil(Object.keys(galleries).length / galleriesPerPage);
-    let galleryNames = Object.keys(galleries).slice(
+    let galleryKeys = Object.keys(galleries);
+    if (settings.sortGalleryNames)
+      galleryKeys = galleryKeys.sort((a, b) => a.localeCompare(b, navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}));
+    let galleryNames = galleryKeys.slice(
       currentPage * galleriesPerPage,
       (currentPage + 1) * galleriesPerPage
     );
@@ -405,7 +408,7 @@ SOFTWARE.
         }
       } else if (currentPage + increment >= 0 && currentPage + increment < totalPages) {
         currentPage += increment;
-        galleryNames = Object.keys(galleries).slice(
+        galleryNames = galleryKeys.slice(
           currentPage * galleriesPerPage,
           (currentPage + 1) * galleriesPerPage
         );

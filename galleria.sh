@@ -197,7 +197,8 @@ for dir in "${dirs[@]}"; do
     fi
 
     # Set the first image, if needed
-    if (( $((rem)) != 1 )); then
+    # Force base 10 to ensure bash doesn't attempt a stupid octal conversion
+    if (( $((10#$rem)) != 1 )); then
       echo "    firstImage: \"${files[0]}\","
     fi
 
