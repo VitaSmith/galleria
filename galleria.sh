@@ -3,8 +3,10 @@
 
 # Read our settings from the global config file
 config_file="galleria.cfg"
+IFS='|'
 default_ext=($(grep "defaultExtension" "$config_file" | sed -E 's/.*\"(\..+)\".*/\1/'))
-extensions=($(grep "knownExtensions" "$config_file" | sed -E 's/.*\[([^]]+)\].*/\1/' | tr -d '" ' | tr ',' '\n'))
+extensions=($(grep "knownExtensions" "$config_file" | sed -E 's/.*\[ +([^]]+) +\].*/\1/' | tr -d '" ' | tr ',' '|'))
+ignored_dirs=($(grep "ignoreDirectories" "$config_file" | sed -E 's/.*\[ +([^]]+) +\].*/\1/' | sed -E 's/, +/,/g' | tr -d '"' | tr ',' '|'))
 json_file=($(grep "jsonFile" "$config_file" |  sed -E 's/.*\:.*\"(.+)\".*/\1/'))
 declare -A json_convert
 while IFS=',' read -ra pairs; do
@@ -18,9 +20,6 @@ done < <(grep "jsonConvert" "$config_file" | sed -E 's/.*\{(.*)\}.*/\1/' | tr -d
 # Ensure that spaces in folder names are handled properly
 IFS='
 '
-# Ensure that our filtering for extensions is case-insensitive
-shopt -s nocaseglob > /dev/null
-
 echo "const galleries = {"
 
 # Using -v ensures natural sorting of directories (i.e '11/' listed before '101/')
@@ -30,6 +29,9 @@ for dir in "${dirs[@]}"; do
   no_pattern=0
   sub_gallery=0
   dir=${dir::-1}
+  if [[ ${ignored_dirs[@]} =~ "${dir}" ]]; then
+    continue
+  fi
   cd "$dir"
 
   # Check if we have a 'galleria.html+.js' in which case we create a sub-gallery
@@ -44,6 +46,9 @@ for dir in "${dirs[@]}"; do
     suffixes+="$sep"
     suffixes+="${ext:1}"
     sep=","
+    # Manually add uppercase extension, as using 'shopt -s nocaseglob' has side effects
+    suffixes+="$sep"
+    suffixes+="${ext^^:1}"
   done
   if (( $sub_gallery != 0 )); then
     eval "files=(\$(ls -v */*.{${suffixes}} 2>/dev/null))"

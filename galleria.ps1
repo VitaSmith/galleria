@@ -8,6 +8,10 @@ Get-Content $config_file | ForEach-Object {
   } elseif ($_ -match 'knownExtensions:\s*\[(.+)\]') {
     $content = $Matches[1]
     $extensions = ($content -split ',') -replace '["\s]', ''
+  } elseif ($_ -match 'ignoreDirectories:\s*\[(.+)\]') {
+    $content = $Matches[1]
+    $ignored_dirs = ($content -split ',') -replace '["]', ''
+    $ignored_dirs = $ignored_dirs | ForEach-Object -MemberName Trim
   } elseif ($_ -match 'jsonFile:\s*\"(.+)\"') {
     $json_file = $Matches[1]
   } elseif ($_ -match 'jsonConvert:\s*\{(.+)\}') {
@@ -27,6 +31,10 @@ Get-Content $config_file | ForEach-Object {
 $directories = Get-ChildItem -Directory | Sort-Object Name
 
 foreach ($dir in $directories) {
+  if ($ignored_dirs -contains $dir) {
+    continue;
+  }
+
   $no_pattern = $false
   # Check if we have a 'galleria.html+.js' in which case we create a sub-gallery
   $sub_gallery = (Get-ChildItem $dir -File -Filter "galleria.html") -and (Get-ChildItem $dir -File -Filter "galleria.js")
@@ -130,6 +138,7 @@ foreach ($dir in $directories) {
       $imageList = $files | ForEach-Object { "`"$_`"" }
       Write-Output "    imageList: [ $($imageList -join ', ') ],"
       Write-Output "  },"
+      $no_pattern = $false
       continue
     }
 

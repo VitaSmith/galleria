@@ -19,6 +19,11 @@ with open(config_file, "r") as file:
             content = match.group(1)
             extensions = re.findall(r'"([^"]+)"|\'([^\']+)\'', content)
             extensions = [ext[0] or ext[1] for ext in extensions]
+        if "ignoreDirectories" in line:
+            match = re.search(r'ignoreDirectories:\s*\[(.+)\]', line)
+            content = match.group(1)
+            ignored_dirs = re.findall(r'"([^"]+)"|\'([^\']+)\'', content)
+            ignored_dirs = [dir[0] or dir[1] for dir in ignored_dirs]
         if "jsonFile" in line:
             match = re.search(r'jsonFile:\s*\"(.+)\"', line)
             json_file = match.group(1)
@@ -39,6 +44,10 @@ directories = [d for d in Path(".").iterdir() if d.is_dir()]
 natural_order = lambda s: [int(t) if t.isdigit() else t.lower() for t in re.split(r'(\d+)', s.name)]
 
 for directory in sorted(directories, key = natural_order):
+
+    if directory.name in ignored_dirs:
+        continue;
+
     # Check if we have a 'galleria.html+.js' in which case we create a sub-gallery
     sub_gallery = (
         os.path.isfile(os.path.join(directory, "galleria.html")) and
