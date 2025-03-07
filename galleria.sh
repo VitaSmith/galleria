@@ -27,7 +27,7 @@ echo "const galleries = {"
 dirs=($(ls -vd */))
 for dir in "${dirs[@]}"; do
 
-  skip_gallery=0
+  no_pattern=0
   sub_gallery=0
   dir=${dir::-1}
   cd "$dir"
@@ -144,7 +144,7 @@ for dir in "${dirs[@]}"; do
     skipped_files=()
     seq=$((10#$rem + 1))
     prev_seqname=""
-    for ((i = 1 ; i < ${#files[@]} ; i++ )); do
+    for ((i = 1 ; i < ${#files[@]} && no_pattern == 0; i++ )); do
       basename=${files[$i]}
       basename="${basename%.*}"
       # Check that our basename ends with a number
@@ -165,7 +165,7 @@ for dir in "${dirs[@]}"; do
         printf -v seqname "${prefix}%0${padding}g" $seq
         num_skipped=$((num_skipped + 1))
         if (( num_skipped > 10 )); then
-          skip_gallery=1
+          no_pattern=1
           break;
         fi
       done
@@ -173,9 +173,13 @@ for dir in "${dirs[@]}"; do
       seq=$((seq + 1))
     done
 
-    # Check for error condition
-    if (( skip_gallery != 0 )); then
-      echo "    // FAILED TO PROCESS GALLERY"
+    # If we couldn't devise a pattern, just ouptut all the files as a list
+    if (( no_pattern != 0 )); then
+      echo -n "    imageList: [ "
+      for file in "${files[@]}"; do
+        echo -n "\"${file}\", "
+      done
+      echo "],"
       echo "  },"
       cd ..
       continue;

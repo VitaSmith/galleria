@@ -27,7 +27,7 @@ Get-Content $config_file | ForEach-Object {
 $directories = Get-ChildItem -Directory | Sort-Object Name
 
 foreach ($dir in $directories) {
-  $skip_gallery = $false
+  $no_pattern = $false
   # Check if we have a 'galleria.html+.js' in which case we create a sub-gallery
   $sub_gallery = (Get-ChildItem $dir -File -Filter "galleria.html") -and (Get-ChildItem $dir -File -Filter "galleria.js")
 
@@ -99,7 +99,7 @@ foreach ($dir in $directories) {
     $skipped_files = @()
     $extra_files = @{}
     $prev_seqname = ""
-    for ($i = 1; $i -lt $files.Count; $i++) {
+    for ($i = 1; ($i -lt $files.Count) -and ($no_pattern -eq $false); $i++) {
       $basename = $files[$i].BaseName
       if (-not ($basename -match "\d$")) {
         $extra_files[$i] = $files[$i].Name
@@ -117,8 +117,7 @@ foreach ($dir in $directories) {
         $seqname = "{0}{1:D$padding}" -f $prefix, $seq
 
         if (++$num_skipped -gt 10) {
-          Write-Output "    // FAILED TO PROCESS GALLERY"
-          $skip_gallery = $true
+          $no_pattern = $true
           break
         }
       }
@@ -126,7 +125,11 @@ foreach ($dir in $directories) {
       $seq++
     }
 
-    if ($skip_gallery) {
+    # If we couldn't devise a pattern, just ouptut all the files as a list
+    if ($no_pattern) {
+      $imageList = $files | ForEach-Object { "`"$_`"" }
+      Write-Output "    imageList: [ $($imageList -join ', ') ],"
+      Write-Output "  },"
       continue
     }
 

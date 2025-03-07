@@ -95,6 +95,7 @@ for directory in sorted(directories, key = natural_order):
         print('  },')
         continue
 
+    no_pattern = False
     if not remainder or not first_file.startswith(prefix + remainder):
         # Output all files as a list
         file_list = ", ".join(f'"{f.name}"' for f in files)
@@ -134,11 +135,19 @@ for directory in sorted(directories, key = natural_order):
                 seqname = f"{prefix}{seq:0{padding}}"
                 num_skipped += 1
                 if num_skipped > 10:
-                    print("    // FAILED TO PROCESS GALLERY")
+                    no_pattern = True
                     break
 
             prev_seqname = seqname
             seq += 1
+
+        # If we couldn't devise a pattern, just ouptut all the files as a list
+        if no_pattern:
+            # Output all files as a list
+            file_list = ", ".join(f'"{f.name}"' for f in files)
+            print(f'    imageList: [ {file_list} ],')
+            print('  },')
+            continue;
 
         # Output gallery-specific settings
         if gallery_default_ext != default_ext:
@@ -151,7 +160,7 @@ for directory in sorted(directories, key = natural_order):
             padded_number = str(1).zfill(padding)
             print(f'    numberPadding: "{padded_number}",')
 
-        if int(remainder.lstrip("0")) != 1:
+        if int(remainder.lstrip("0") or "0") != 1:
             print(f'    firstImage: "{files[0].name}",')
 
         if skipped_files:
