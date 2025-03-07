@@ -100,7 +100,7 @@ for directory in sorted(directories, key = natural_order):
         gallery_cover = os.path.join(directory, "galleria" + extension)
         if not os.path.isfile(gallery_cover):
             shutil.copyfile(files[0], gallery_cover)
-        print(f'    imageList = [ "galleria{extension}" ],')
+        print(f'    imageList: [ "galleria{extension}" ],')
         print('  },')
         continue
 

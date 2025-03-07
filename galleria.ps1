@@ -85,7 +85,7 @@ foreach ($dir in $directories) {
     if (!(Test-Path -Path $gallery_cover)) {
       Copy-Item $files[0] -Destination $gallery_cover
     }
-    Write-Output "    imageList = [ `"galleria$extension`" ],"
+    Write-Output "    imageList: [ `"galleria$extension`" ],"
     Write-Output "  },"
     continue
   }

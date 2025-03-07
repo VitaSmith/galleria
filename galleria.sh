@@ -106,7 +106,7 @@ for dir in "${dirs[@]}"; do
     if [[ ! -f "${gallery_cover}" ]]; then
       cp "${files[0]}" "${gallery_cover}"
     fi
-    echo "    imageList = [ \"${gallery_cover}\" ],"
+    echo "    imageList: [ \"${gallery_cover}\" ],"
     echo "  },"
     cd ..
     continue
