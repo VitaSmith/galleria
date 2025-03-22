@@ -1,8 +1,10 @@
+#!/bin/env python3
 # Generate data for Galleria from a set of image folders in the current directory
 import os
 import re
 import json
 import shutil
+from string import digits
 from pathlib import Path
 from collections import defaultdict
 
@@ -85,7 +87,7 @@ for directory in sorted(directories, key = natural_order):
     # Guess pattern from the first file
     first_file = files[0].stem
     extension = files[0].suffix
-    prefix = ''.join([c for c in first_file if not c.isdigit()])
+    prefix = first_file.rstrip(digits)
     remainder = first_file[len(prefix):]
 
     print(f'  "{directory.name}": {{')

@@ -66,7 +66,7 @@ foreach ($dir in $directories) {
   # Try to guess the pattern from the first file listed
   $first_file = $files[0].BaseName
   $extension = $files[0].Extension
-  $prefix = $first_file -replace "\d", ""
+  $prefix = $first_file.TrimEnd("0123456789")
   $remainder = $first_file.Substring($prefix.Length)
 
   # Add the gallery header

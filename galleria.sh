@@ -81,7 +81,7 @@ for dir in "${dirs[@]}"; do
   # Remove extension
   first_file="${first_file%.*}"
   # Check for a prefix
-  prefix=$(echo $first_file | tr -d '[:digit:]')
+  prefix=$(echo $first_file | sed 's/[0-9]\+$//')
   # Remove the prefix, if any
   rem=${first_file:${#prefix}}
 
