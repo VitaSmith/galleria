@@ -70,7 +70,7 @@ foreach ($dir in $directories) {
   $remainder = $first_file.Substring($prefix.Length)
 
   # Add the gallery header
-  Write-Output "  `"$($dir.Name)`": {"
+  Write-Output "  `"$($dir.Name.Replace('"','\"'))`": {"
   Write-Output "    images: $($files.Count),"
 
   # Output the processed JSON data

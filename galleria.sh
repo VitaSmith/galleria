@@ -17,6 +17,11 @@ while IFS=',' read -ra pairs; do
   done
 done < <(grep "jsonConvert" "$config_file" | sed -E 's/.*\{(.*)\}.*/\1/' | tr -d ' ')
 
+# May need to escape double quotes in gallery names
+esc() {
+  printf "%s" "$(LC_ALL=C sed 's/"/\\"/g' <<<"$1")"
+}
+
 # Ensure that spaces in folder names are handled properly
 IFS='
 '
@@ -86,7 +91,7 @@ for dir in "${dirs[@]}"; do
   rem=${first_file:${#prefix}}
 
   # Add the gallery header
-  echo "  \"${dir}\": {"
+  echo "  \"$(esc "$dir")\": {"
   echo "    images: ${#files[@]},"
 
   # Output the processed JSON data

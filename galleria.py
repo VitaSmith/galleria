@@ -90,7 +90,7 @@ for directory in sorted(directories, key = natural_order):
     prefix = first_file.rstrip(digits)
     remainder = first_file[len(prefix):]
 
-    print(f'  "{directory.name}": {{')
+    print(f'  "{directory.name.replace('"', '\\"')}": {{')
     print(f'    images: {len(files)},')
 
     # Output the processed JSON data
