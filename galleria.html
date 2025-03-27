@@ -127,7 +127,7 @@ SOFTWARE.
   <div class="thumbnail-list" id="thumbnailList"></div>
   <div class="image-viewer" id="imageViewer">
     <div class="image-container" id="imageContainer">
-      <img id="imageView" alt="Image not found">
+      <img id="imageView" alt="Image not found" loading="lazy">
     </div>
   </div>
   <script>
@@ -224,6 +224,7 @@ SOFTWARE.
       observer.observe(document, { childList: true, subtree: true });
 
       if (!currentGallery) {
+        // Global mode, where we display the first image of each gallery
         prevBtn.style.display = (currentPage <= 0 || totalPages == 1) ? "none" : "block";
         nextBtn.style.display = (currentPage >= totalPages - 1 || totalPages == 1) ? "none" : "block";
 
@@ -235,7 +236,6 @@ SOFTWARE.
           document.title += "]/" + Object.keys(galleries).length;
         }
 
-        // Global mode, where we display the first image of each gallery
         for (let i = 0; i < galleryNames.length; i++) {
           const galleryData = galleries[galleryNames[i]];
 
@@ -299,6 +299,7 @@ SOFTWARE.
             galleryData.imageList.length : galleryData.images;
           thumbnailImg.src = encodeURIComponent(galleryNames[i]) + "/" + imageName;
           thumbnailImg.alt = "'" + imageName + "' not found";
+          thumbnailImg.loading = "lazy";
           thumbnailImg.title = numImages + " image" + ((numImages === 1) ? "" : "s");
           thumbnailImg.style.maxWidth = settings.thumbnailMaxWidth;
           thumbnailImg.style.maxHeight = settings.thumbnailMaxHeight;
@@ -335,9 +336,9 @@ SOFTWARE.
           thumbnailListItem.appendChild(thumbnailLabel);
         }
       } else if (!singleImageMode) {
+          // Gallery mode, where we display all the pages from a gallery as thumbnails
           prevBtn.style.display = "none";
           nextBtn.style.display = "none";
-          // Gallery mode, where we display all the pages from a gallery as thumbnails
           const galleryData = galleries[currentGallery];
           document.title = galleryData.altName ?? currentGallery;
 
@@ -350,6 +351,7 @@ SOFTWARE.
             const thumbnailImg = document.createElement("img");
             thumbnailImg.src = currentGallery + "/" + imageList[i];
             thumbnailImg.alt = "'" + imageList[i] + "' not found";
+            thumbnailImg.loading = "lazy";
             thumbnailImg.style.maxWidth = settings.thumbnailMaxWidth;
             thumbnailImg.style.maxHeight = settings.thumbnailMaxHeight;
             thumbnailListItem.appendChild(thumbnailImg);
