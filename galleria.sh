@@ -33,8 +33,10 @@ for dir in "${dirs[@]}"; do
 
   no_pattern=0
   sub_gallery=0
+  ignore_dir=0
   dir=${dir::-1}
-  if [[ ${ignored_dirs[@]} =~ "${dir}" ]]; then
+  for prefix in "${ignored_dirs[@]}"; do [[ "${dir}" == $prefix* ]] && ignore_dir=1 && break; done
+  if (( $ignore_dir != 0 )); then
     continue
   fi
   cd "$dir"

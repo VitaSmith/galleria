@@ -297,7 +297,7 @@ SOFTWARE.
           const imageName = getImageName(0, galleryData);
           const numImages = (galleryData.imageList !== undefined) ?
             galleryData.imageList.length : galleryData.images;
-          thumbnailImg.src = galleryNames[i] + "/" + imageName;
+          thumbnailImg.src = encodeURIComponent(galleryNames[i]) + "/" + imageName;
           thumbnailImg.alt = "'" + imageName + "' not found";
           thumbnailImg.title = numImages + " image" + ((numImages === 1) ? "" : "s");
           thumbnailImg.style.maxWidth = settings.thumbnailMaxWidth;
@@ -371,7 +371,7 @@ SOFTWARE.
         const galleryData = galleries[currentGallery];
         const numImages = imageList.length;
         const imageName = imageList[currentImageIndex];
-        imageView.src = currentGallery + "/" + imageName;
+        imageView.src = encodeURIComponent(currentGallery) + "/" + imageName;
         document.title = currentGallery + "/" + imageName + " [" + (currentImageIndex + 1) + "/" + numImages + "]";
         imageView.alt = "'" + imageName  + "' not found";
         imageView.style.zIndex = "1";

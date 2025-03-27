@@ -31,7 +31,7 @@ Get-Content $config_file | ForEach-Object {
 $directories = Get-ChildItem -Directory | Sort-Object Name
 
 foreach ($dir in $directories) {
-  if ($ignored_dirs -contains $dir) {
+  if ($ignored_dirs | Where-Object { $dir -like "$_*" }) {
     continue;
   }
 

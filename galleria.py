@@ -25,7 +25,7 @@ with open(config_file, "r") as file:
             match = re.search(r'ignoreDirectories:\s*\[(.+)\]', line)
             content = match.group(1)
             ignored_dirs = re.findall(r'"([^"]+)"|\'([^\']+)\'', content)
-            ignored_dirs = [dir[0] or dir[1] for dir in ignored_dirs]
+            ignored_dirs = [d[0] or d[1] for d in ignored_dirs]
         if "jsonFile" in line:
             match = re.search(r'jsonFile:\s*\"(.+)\"', line)
             json_file = match.group(1)
@@ -47,7 +47,7 @@ natural_order = lambda s: [int(t) if t.isdigit() else t.lower() for t in re.spli
 
 for directory in sorted(directories, key = natural_order):
 
-    if directory.name in ignored_dirs:
+    if any(directory.name.startswith(prefix) for prefix in ignored_dirs):
         continue;
 
     # Check if we have a 'galleria.html+.js' in which case we create a sub-gallery
@@ -90,7 +90,8 @@ for directory in sorted(directories, key = natural_order):
     prefix = first_file.rstrip(digits)
     remainder = first_file[len(prefix):]
 
-    print(f'  "{directory.name.replace('"', '\\"')}": {{')
+    dir_name = directory.name.replace('"', '\\"')
+    print(f'  "{dir_name}": {{')
     print(f'    images: {len(files)},')
 
     # Output the processed JSON data
