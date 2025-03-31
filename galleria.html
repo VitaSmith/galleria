@@ -147,7 +147,8 @@ SOFTWARE.
     let displayInfo = false;
     let imageList = [];
     let skipped = 0;
-    let currentPage = 0;
+    let currentLevel = (sessionStorage.getItem("currentLevel") != null) ? sessionStorage.getItem("currentLevel") : 0;
+    let currentPage = (sessionStorage.getItem("currentPage" + currentLevel) != null) ? sessionStorage.getItem("currentPage" + currentLevel) : 0;
     let totalPages = Math.ceil(Object.keys(galleries).length / galleriesPerPage);
     let galleryKeys = Object.keys(galleries);
     if (settings.sortGalleryNames)
@@ -248,12 +249,8 @@ SOFTWARE.
                 galleryData.imageList.length == 1 &&
                 galleryData.imageList[0].match("^galleria\..+$")
               ) {
-              // An imageList with a single 'galleria.xyz' image indicates a sub-gallery
-              a = document.createElement("a");
-              a.classList.add("nostyle");
-              a.href = galleryNames[i] + "/galleria.html";
-              thumbnailList.appendChild(a);
-              appendTo = a;
+                // An imageList with a single 'galleria.xyz' image indicates a sub-gallery
+                galleryData.subGallery = true;
             }
           } else if (galleryData.images == undefined || galleryData.images === 0) {
             return;
@@ -306,8 +303,8 @@ SOFTWARE.
           thumbnailListItem.appendChild(thumbnailImg);
 
           // Open the first image or the subgallery the gallery on click
-          if (galleryData.type != "subgallery") {
-            thumbnailListItem.addEventListener("click", () => {
+          thumbnailListItem.addEventListener("click", () => {
+            if (!galleryData.subGallery) {
               imageList = [];
               // Construct the list of all the images in the gallery
               if (galleryData.imageList !== undefined) {
@@ -325,8 +322,12 @@ SOFTWARE.
                 hideThumbnails();
                 updateImage();
               }
-            });
-          }
+            } else {
+              sessionStorage.setItem("currentPage" + currentLevel, currentPage);
+              sessionStorage.setItem("currentLevel", currentLevel + 1);
+              window.location = galleryNames[i] + "/galleria.html";
+            }
+          });
 
           // Set the label
           const thumbnailLabel = document.createElement("span");
@@ -459,6 +460,7 @@ SOFTWARE.
           element.style.display = displayInfo ? "inline-block" : "none";
         }
       } else if (event.key === "Escape") {
+        sessionStorage.setItem("currentLevel", currentLevel - 1);
         window.history.back();
       }
     });
