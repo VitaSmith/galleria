@@ -32,6 +32,7 @@ image data, in all its glory) without the unnecessary, and often unwanted, distr
 - Lightweight.
 - Highly customizable.
 - Can process existing JSON metadata.
+- Can handle recursive galleries of galleries.
 - With ready-to-use scripts (bash, PowerShell, Python) for automated gallery generation.
 
 ## Usage
@@ -55,6 +56,9 @@ forward/backward, as well as the <kbd>PageUp</kbd> and <kbd>PageDown</kbd> keys.
 
 Going back on the first image or forward on the last image will bring you back to the global
 gallery view. Or you can also just press <kbd>Esc</kbd> at any time to do so.
+
+The <kbd>Home</kbd> and <kbd>End</kbd> keys can also be used to navigate directly to the
+first or last image/page.
 
 Pressing <kbd>SPACE</kbd> when viewing an image displays the current gallery as a list of
 clickable thumbnails.

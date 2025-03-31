@@ -397,7 +397,12 @@ SOFTWARE.
     // Display the next/previous page or image
     function switchPageOrImage(increment) {
       if (singleImageMode) {
-        currentImageIndex += increment;
+        if (increment === Number.POSITIVE_INFINITY)
+          currentImageIndex = imageList.length - 1;
+        else if (increment === Number.NEGATIVE_INFINITY)
+          currentImageIndex = 0;
+        else
+          currentImageIndex += increment;
         if (currentImageIndex < 0 || currentImageIndex >= imageList.length) {
           // Go back to the gallery list if we are past first or last image
           currentGallery = null;
@@ -409,13 +414,20 @@ SOFTWARE.
         } else {
           updateImage();
         }
-      } else if (currentPage + increment >= 0 && currentPage + increment < totalPages) {
-        currentPage += increment;
-        galleryNames = galleryKeys.slice(
-          currentPage * galleriesPerPage,
-          (currentPage + 1) * galleriesPerPage
-        );
-        createThumbnails(-1);
+      } else {
+        if (increment === Number.POSITIVE_INFINITY)
+          currentPage = totalPages - 1;
+        else if (increment === Number.NEGATIVE_INFINITY)
+          currentPage = 0;
+        else if (currentPage + increment >= 0 && currentPage + increment < totalPages)
+          currentPage += increment;
+        if (currentPage >= 0 && currentPage < totalPages) {
+          galleryNames = galleryKeys.slice(
+            currentPage * galleriesPerPage,
+            (currentPage + 1) * galleriesPerPage
+          );
+          createThumbnails(-1);
+        }
       }
     }
 
@@ -432,7 +444,11 @@ SOFTWARE.
 
     // Handle keyboard events
     document.addEventListener("keydown", (event) => {
-      if (event.key === "ArrowRight" || event.key === "PageDown") {
+      if (event.key === "End") {
+        switchPageOrImage(Number.POSITIVE_INFINITY);
+      } else if (event.key === "Home") {
+        switchPageOrImage(Number.NEGATIVE_INFINITY);
+      } else if (event.key === "ArrowRight" || event.key === "PageDown") {
         switchPageOrImage(1);
       } else if (event.key === "ArrowLeft" || event.key === "PageUp") {
         switchPageOrImage(-1);
