@@ -140,7 +140,6 @@ SOFTWARE.
     const nextBtn = document.getElementById("nextBtn");
 
     let currentGallery = null;
-    let currentGalleryIndex = 0;
     let currentImageIndex = 0;
     let fitToPage = settings.fitToPage;
     let singleImageMode = false;
@@ -149,6 +148,7 @@ SOFTWARE.
     let skipped = 0;
     let currentLevel = (sessionStorage.getItem("currentLevel") != null) ? sessionStorage.getItem("currentLevel") : 0;
     let currentPage = (sessionStorage.getItem("currentPage" + currentLevel) != null) ? sessionStorage.getItem("currentPage" + currentLevel) : 0;
+    let currentGalleryIndex = (sessionStorage.getItem("currentGalleryIndex" + currentLevel) != null) ? sessionStorage.getItem("currentGalleryIndex" + currentLevel) : 0;
     let totalPages = Math.ceil(Object.keys(galleries).length / galleriesPerPage);
     let galleryKeys = Object.keys(galleries);
     if (settings.sortGalleryNames)
@@ -284,7 +284,9 @@ SOFTWARE.
                 } else {
                   thumbnailTextSpan.innerHTML += galleryData[info];
                 }
-                thumbnailText.appendChild(thumbnailTextSpan);
+                // Only display a field if it has data
+                if (thumbnailTextSpan.innerHTML != info + ": ")
+                  thumbnailText.appendChild(thumbnailTextSpan);
               }
             }
             thumbnailListItem.appendChild(thumbnailText);
@@ -324,6 +326,7 @@ SOFTWARE.
               }
             } else {
               sessionStorage.setItem("currentPage" + currentLevel, currentPage);
+              sessionStorage.setItem("currentGalleryIndex" + currentLevel, currentGalleryIndex);
               sessionStorage.setItem("currentLevel", currentLevel + 1);
               window.location = galleryNames[i] + "/galleria.html";
             }
