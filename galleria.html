@@ -336,7 +336,7 @@ SOFTWARE.
           const thumbnailLabel = document.createElement("span");
           thumbnailLabel.classList.add("thumbnail-label");
           thumbnailLabel.style.maxWidth = settings.thumbnailMaxWidth;
-          thumbnailLabel.textContent = galleryData.altName ?? galleryNames[i];
+          thumbnailLabel.textContent = (settings.showFolderName ? "[" + galleryNames[i] + "] " : "") + (galleryData.altName ?? galleryNames[i]);
           thumbnailListItem.appendChild(thumbnailLabel);
         }
       } else if (!singleImageMode) {
