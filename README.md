@@ -65,6 +65,8 @@ clickable thumbnails.
 
 Pressing <kbd>F</kbd> when viewing an image toggles between "fit to screen" and actual size.
 
+Pressing <kbd>R</kbd> toggles randomization qhwn viewing galleries/thumbnails.
+
 ### Data file generation
 
 Obviously, a local gallery visualizer is only as good as the utilities that can automate the

@@ -1,6 +1,6 @@
 <!--
 Galleria - A self contained HTML5 local gallery viewer
-Copyright © 2025 VitaSmith [https://github.com/VitaSmith/galleria]
+Copyright © 2025-2026 VitaSmith [https://github.com/VitaSmith/galleria]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -144,15 +144,15 @@ SOFTWARE.
     let fitToPage = settings.fitToPage;
     let singleImageMode = false;
     let displayInfo = false;
+    let randomThumbnails = false;
+    let randomGalleries = false;
     let imageList = [];
     let skipped = 0;
     let currentLevel = (sessionStorage.getItem("currentLevel") != null) ? sessionStorage.getItem("currentLevel") : 0;
     let currentPage = (sessionStorage.getItem("currentPage" + currentLevel) != null) ? sessionStorage.getItem("currentPage" + currentLevel) : 0;
     let currentGalleryIndex = (sessionStorage.getItem("currentGalleryIndex" + currentLevel) != null) ? sessionStorage.getItem("currentGalleryIndex" + currentLevel) : 0;
     let totalPages = Math.ceil(Object.keys(galleries).length / galleriesPerPage);
-    let galleryKeys = Object.keys(galleries);
-    if (settings.sortGalleryNames)
-      galleryKeys = galleryKeys.sort((a, b) => a.localeCompare(b, navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}));
+    let galleryKeys = getGalleryKeys(false);
     let galleryNames = galleryKeys.slice(
       currentPage * galleriesPerPage,
       (currentPage + 1) * galleriesPerPage
@@ -163,6 +163,39 @@ SOFTWARE.
     document.body.style.background = settings.defaultBackgroundColor;
     document.body.style.font = settings.defaultFont;
     document.getElementById("pagination").style.color = settings.defaultArrowColor;
+
+    function randomize(array) {
+      var m = array.length, i, k;
+      while (m) {
+        i = Math.floor(Math.random() * m--);
+        k = array[m];
+        array[m] = array[i];
+        array[i] = k;
+      }
+    }
+
+    function getGalleryKeys(random) {
+      keys = Object.keys(galleries);
+      if (random)
+        randomize(keys);
+      else if (settings.sortGalleryNames)
+        keys.sort((a, b) => a.localeCompare(b, navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}));
+      return keys;
+    }
+
+    function getImageList(galleryData, random) {
+      list = [];
+      if (galleryData.imageList !== undefined) {
+        list = galleryData.imageList;
+      } else {
+        const defaultExtension = galleryData.defaultExtension ?? settings.defaultExtension;
+        for (let i = 0; i < galleryData.images; i++)
+          list.push(getImageName(i, galleryData));
+      }
+      if (random)
+        randomize(list);
+      return list;
+    }
 
     function hideThumbnails() {
       prevBtn.style.display = "block";
@@ -294,8 +327,7 @@ SOFTWARE.
 
           const thumbnailImg = document.createElement("img");
           const imageName = getImageName(0, galleryData);
-          const numImages = (galleryData.imageList !== undefined) ?
-            galleryData.imageList.length : galleryData.images;
+          const numImages = (galleryData.imageList !== undefined) ? galleryData.imageList.length : galleryData.images;
           thumbnailImg.src = encodeURIComponent(galleryNames[i]) + "/" + imageName;
           thumbnailImg.alt = "'" + imageName + "' not found";
           thumbnailImg.loading = "lazy";
@@ -307,15 +339,7 @@ SOFTWARE.
           // Open the first image or the subgallery the gallery on click
           thumbnailListItem.addEventListener("click", () => {
             if (!galleryData.subGallery) {
-              imageList = [];
-              // Construct the list of all the images in the gallery
-              if (galleryData.imageList !== undefined) {
-                imageList = galleryData.imageList;
-              } else {
-                const defaultExtension = galleryData.defaultExtension ?? settings.defaultExtension;
-                for (let i = 0; i < numImages; i++)
-                  imageList.push(getImageName(i, galleryData));
-              }
+              imageList = getImageList(galleryData, false);
               if (imageList.length !== 0) {
                 currentGallery = galleryNames[i];
                 currentGalleryIndex = i;
@@ -410,6 +434,7 @@ SOFTWARE.
           // Go back to the gallery list if we are past first or last image
           currentGallery = null;
           singleImageMode = false;
+          randomThumbnails = false;
           thumbnailList.style.display = "flex";
           imageViewer.style.display = "none";
           imageView.src = "";
@@ -468,16 +493,30 @@ SOFTWARE.
         } else if (event.key === "Escape") {
           currentGallery = null;
           singleImageMode = false;
+          randomThumbnails = false;
           thumbnailList.style.display = "flex";
           imageViewer.style.display = "none";
           imageView.src = "";
           createThumbnails(currentGalleryIndex);
+        } else if (event.key === "r" || event.key === "R") {
+           randomThumbnails = !randomThumbnails;
+           imageList = getImageList(galleries[currentGallery], randomThumbnails)
+           createThumbnails(0);
+           if (singleImageMode) {
+             currentImageIndex = 0;
+             updateImage();
+           }
         }
       } else if (event.key === "i" || event.key === "I") {
         displayInfo = !displayInfo;
         for (let element of document.getElementsByClassName("thumbnail-info")) {
           element.style.display = displayInfo ? "inline-block" : "none";
         }
+      } else if (event.key === "r" || event.key === "R") {
+         randomGalleries = !randomGalleries;
+         galleryKeys = getGalleryKeys(randomGalleries);
+         galleryNames = galleryKeys.slice(0, galleriesPerPage);
+         createThumbnails(0);
       } else if (event.key === "Escape") {
         sessionStorage.setItem("currentLevel", currentLevel - 1);
         window.history.back();
