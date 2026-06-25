@@ -328,7 +328,7 @@ SOFTWARE.
           const thumbnailImg = document.createElement("img");
           const imageName = getImageName(0, galleryData);
           const numImages = (galleryData.imageList !== undefined) ? galleryData.imageList.length : galleryData.images;
-          thumbnailImg.src = encodeURIComponent(galleryNames[i]) + "/" + imageName;
+          thumbnailImg.src = encodeURIComponent(galleryNames[i]) + "/" + encodeURIComponent(imageName);
           thumbnailImg.alt = "'" + imageName + "' not found";
           thumbnailImg.loading = "lazy";
           thumbnailImg.title = numImages + " image" + ((numImages === 1) ? "" : "s");
@@ -377,7 +377,7 @@ SOFTWARE.
             thumbnailList.appendChild(thumbnailListItem);
 
             const thumbnailImg = document.createElement("img");
-            thumbnailImg.src = currentGallery + "/" + imageList[i];
+            thumbnailImg.src = encodeURIComponent(currentGallery) + "/" + encodeURIComponent(imageList[i]);
             thumbnailImg.alt = "'" + imageList[i] + "' not found";
             thumbnailImg.loading = "lazy";
             thumbnailImg.style.maxWidth = settings.thumbnailMaxWidth;
