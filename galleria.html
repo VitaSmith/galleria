@@ -114,15 +114,41 @@ SOFTWARE.
       color: inherit;
       cursor: auto;
     }
+    #top, #bottom, #left, #right {
+      background: transparent;
+      position: fixed;
+    }
+    #left, #right {
+      top: 0; bottom: 0;
+      width: 8px;
+    }
+    #left { left: 0; }
+    #right { right: 0; }
+    #top, #bottom {
+      left: 0; right: 0;
+      height: 8px;
+    }
+    #top { top: 0; }
+    #bottom { bottom: 0; }
+    @keyframes flasher {
+      0% { background: transparent; }
+      50% { background: red; }
+      100% { background: transparent; }
+    }
+    .flash-active { animation: flasher 0.5s ease-out forwards };
   </style>
   <!-- Load the external settings and gallery data -->
   <script type="text/javascript" src="galleria.cfg"></script>
   <script type="text/javascript" src="galleria.js"></script>
 </head>
 <body>
+  <div id="left" class="flasher"></div>
+  <div id="right" class="flasher"></div>
+  <div id="top" class="flasher"></div>
+  <div id="bottom" class="flasher"></div>
   <div class="pagination" id="pagination">
-    <span id="prevBtn" onclick="switchPageOrImage(-1)" class="nav-arrow nav-left">&#x276e;</span>
-    <span id="nextBtn" onclick="switchPageOrImage(1)" class="nav-arrow nav-right">&#x276f;</span>
+    <span id="prevBtn" onclick="switchPageOrImage(-1, 500)" class="nav-arrow nav-left">&#x276e;</span>
+    <span id="nextBtn" onclick="switchPageOrImage(1, 500)" class="nav-arrow nav-right">&#x276f;</span>
   </div>
   <div class="thumbnail-list" id="thumbnailList"></div>
   <div class="image-viewer" id="imageViewer">
@@ -422,7 +448,7 @@ SOFTWARE.
     }
 
     // Display the next/previous page or image
-    function switchPageOrImage(increment) {
+    function switchPageOrImage(increment, duration) {
       if (singleImageMode) {
         if (increment === Number.POSITIVE_INFINITY)
           currentImageIndex = imageList.length - 1;
@@ -431,14 +457,24 @@ SOFTWARE.
         else
           currentImageIndex += increment;
         if (currentImageIndex < 0 || currentImageIndex >= imageList.length) {
-          // Go back to the gallery list if we are past first or last image
-          currentGallery = null;
-          singleImageMode = false;
-          randomThumbnails = false;
-          thumbnailList.style.display = "flex";
-          imageViewer.style.display = "none";
-          imageView.src = "";
-          createThumbnails(currentGalleryIndex);
+          if (duration < 250) {
+            currentImageIndex -= increment;
+            var elementList = document.getElementsByClassName('flasher');
+            var elementListSize = elementList.length;
+            for (var i = 0 ; i < elementListSize; i++) {
+              elementList[i].classList.remove('flash-active');
+              elementList[i].offsetWidth;
+              elementList[i].classList.add('flash-active');
+            }
+          } else {
+            currentGallery = null;
+            singleImageMode = false;
+            randomThumbnails = false;
+            thumbnailList.style.display = "flex";
+            imageViewer.style.display = "none";
+            imageView.src = "";
+            createThumbnails(currentGalleryIndex);
+          }
         } else {
           updateImage();
         }
@@ -466,31 +502,32 @@ SOFTWARE.
         const imageWidth = imageView.clientWidth;
         // Check if the click is on the left or right side of the image
         const increment = (event.clientX - imageView.getBoundingClientRect().left > imageWidth / 2) ? 1 : -1;
-        switchPageOrImage(increment);
+        switchPageOrImage(increment, 500);
       }
     });
 
     // Handle keyboard events
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "End") {
-        switchPageOrImage(Number.POSITIVE_INFINITY);
-      } else if (event.key === "Home") {
-        switchPageOrImage(Number.NEGATIVE_INFINITY);
-      } else if (event.key === "ArrowRight" || event.key === "PageDown") {
-        switchPageOrImage(1);
-      } else if (event.key === "ArrowLeft" || event.key === "PageUp") {
-        switchPageOrImage(-1);
+    const pressedKeys = {};
+    const handleKeyparess = (key, duration) => {
+      if (key === "End") {
+        switchPageOrImage(Number.POSITIVE_INFINITY, duration);
+      } else if (key === "Home") {
+        switchPageOrImage(Number.NEGATIVE_INFINITY, duration);
+      } else if (key === "ArrowRight" || key === "PageDown") {
+        switchPageOrImage(1, duration);
+      } else if (key === "ArrowLeft" || key === "PageUp") {
+        switchPageOrImage(-1, duration);
       } else if (currentGallery) {
-        if (singleImageMode && (event.key === "f" || event.key === "F")) {
+        if (singleImageMode && (key === "f" || key === "F")) {
           fitToPage = !fitToPage;
           updateImage();
-        } else if (singleImageMode && event.key === " ") {
+        } else if (singleImageMode && key === " ") {
           singleImageMode = false;
           thumbnailList.style.display = "flex";
           imageViewer.style.display = "none";
           imageView.src = "";
           createThumbnails(currentImageIndex);
-        } else if (event.key === "Escape") {
+        } else if (key === "Escape") {
           currentGallery = null;
           singleImageMode = false;
           randomThumbnails = false;
@@ -498,7 +535,7 @@ SOFTWARE.
           imageViewer.style.display = "none";
           imageView.src = "";
           createThumbnails(currentGalleryIndex);
-        } else if (event.key === "r" || event.key === "R") {
+        } else if (key === "r" || key === "R") {
            randomThumbnails = !randomThumbnails;
            imageList = getImageList(galleries[currentGallery], randomThumbnails)
            createThumbnails(0);
@@ -507,20 +544,28 @@ SOFTWARE.
              updateImage();
            }
         }
-      } else if (event.key === "i" || event.key === "I") {
+      } else if (key === "i" || key === "I") {
         displayInfo = !displayInfo;
         for (let element of document.getElementsByClassName("thumbnail-info")) {
           element.style.display = displayInfo ? "inline-block" : "none";
         }
-      } else if (event.key === "r" || event.key === "R") {
+      } else if (key === "r" || key === "R") {
          randomGalleries = !randomGalleries;
          galleryKeys = getGalleryKeys(randomGalleries);
          galleryNames = galleryKeys.slice(0, galleriesPerPage);
          createThumbnails(0);
-      } else if (event.key === "Escape") {
+      } else if (key === "Escape") {
         sessionStorage.setItem("currentLevel", currentLevel - 1);
         window.history.back();
       }
+    }
+    document.body.addEventListener("keydown", ({ key }) => {
+      if (!pressedKeys[key])
+        pressedKeys[key] = Date.now();
+    });
+    document.body.addEventListener("keyup", ({ key }) => {
+      handleKeyparess(key, Date.now() - pressedKeys[key]);
+      pressedKeys[key] = null;
     });
 
     // Wait for the DOM content to be loaded before creating the thumbnails
